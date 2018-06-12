@@ -48,7 +48,7 @@ parser.add_argument('--seed', type=int, default=123,
                     help='random seed')
 parser.add_argument('--gpu', type=str, default='0',
                     help='gpu device id')
-parser.add_argument('--nhwc', action='store_true',
+parser.add_argument('--nchw', action='store_true',
                     help='train fullyConv in NCHW mode')
 parser.add_argument('--summary_iters', type=int, default=10,
                     help='record training summary after this many iterations')
@@ -87,6 +87,7 @@ def _save_if_training(agent, summary_writer):
 
 
 def main():
+    # Overwrite experiment summaries
     if args.train and args.ow:
       shutil.rmtree(ckpt_path, ignore_errors=True)
       shutil.rmtree(summary_path, ignore_errors=True)
@@ -111,8 +112,9 @@ def main():
     sess = tf.Session()
     summary_writer = tf.summary.FileWriter(summary_path)
 
-    network_data_format = 'NHWC' if args.nhwc else 'NCHW'
+    network_data_format = 'NCHW' if args.nchw else 'NHWC'  # XXX NHWC -> NCHW
 
+    # Create A2CAgent instance
     agent = A2CAgent(
         sess=sess,
         network_data_format=network_data_format,
@@ -121,6 +123,7 @@ def main():
         learning_rate=args.lr,
         max_to_keep=args.max_to_keep)
 
+    # Setup A2CAgent runner
     runner = A2CRunner(
         envs=envs,
         agent=agent,
@@ -129,9 +132,11 @@ def main():
         discount=args.discount,
         n_steps=args.steps_per_batch)
 
+    # Build A2CAgent graphs
     static_shape_channels = runner.preproc.get_input_channels()
     agent.build(static_shape_channels, resolution=args.res)
 
+    # Load the latest ckpt
     if os.path.exists(ckpt_path):
       agent.load(ckpt_path)
     else:
@@ -139,6 +144,7 @@ def main():
 
     runner.reset()
 
+    # Start Train/Eval
     i = 0
     try:
       while True:
@@ -162,6 +168,7 @@ def main():
     except KeyboardInterrupt:
         pass
 
+    # Save the model ckpt
     _save_if_training(agent, summary_writer)
 
     envs.close()
