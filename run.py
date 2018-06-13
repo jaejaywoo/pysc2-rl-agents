@@ -76,7 +76,7 @@ os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu
 
 ckpt_path = os.path.join(args.save_dir, args.experiment_id)
 summary_type = 'train' if args.train else 'eval'
-summary_path = os.path.join(args.summary_dir, args.experiment_id, summary_type)
+summary_base = os.path.join(args.summary_dir, args.experiment_id, summary_type)
 
 
 def _save_if_training(agent, summary_writer):
@@ -87,6 +87,14 @@ def _save_if_training(agent, summary_writer):
 
 
 def main():
+    # Create subdirs for each run in experiment
+    if os.path.exists(summary_base):
+        run_dirs = [os.path.join(summary_base, d) for d in os.listdir(summary_base)]
+        latest_run = int(max(run_dirs, key=os.path.getmtime).split('-')[-1])
+        summary_path = os.path.join(summary_base, 'run-' + str(latest_run + 1))
+    else:
+        summary_path = os.path.join(summary_base, 'run-1')
+
     # Overwrite experiment summaries
     if args.train and args.ow:
       shutil.rmtree(ckpt_path, ignore_errors=True)
