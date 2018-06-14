@@ -42,6 +42,9 @@ class A2CRunner():
   def get_mean_score(self):
     return self.cumulative_score / self.episode_counter
 
+  def _print_agent_actions(self, actions):
+      print("sampled_actions: " + " ".join(map(str, actions)))
+
   def _summarize_episode(self, timestep):
     score = timestep.observation["score_cumulative"][0]
     if self.summary_writer is not None:
@@ -74,6 +77,7 @@ class A2CRunner():
 
     for n in range(self.n_steps):
       actions, value_estimate = self.agent.step(last_obs)
+      self._print_agent_actions(actions)
       actions = mask_unused_argument_samples(actions)
       size = last_obs['screen'].shape[1:3]
 
@@ -149,11 +153,11 @@ def actions_to_pysc2(actions, size):
   for n in range(fn_id.shape[0]):
     a_0 = fn_id[n]
     a_l = []
-    
+
     # TODO: Figure out the index problem! fn_id yields 524 as an action.
     if a_0 == 524:
       a_0 -= 1
-    
+
     for arg_type in FUNCTIONS._func_list[a_0].args:
       arg_id = arg_ids[arg_type][n]
       if is_spatial_action[arg_type]:

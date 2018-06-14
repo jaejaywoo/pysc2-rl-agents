@@ -12,7 +12,6 @@ from rl.agents.a2c.agent import A2CAgent
 from rl.networks.fully_conv import FullyConv
 from rl.environment import SubprocVecEnv, make_sc2env, SingleEnv
 
-
 # Workaround for pysc2 flags
 from absl import flags
 FLAGS = flags.FLAGS
@@ -71,6 +70,8 @@ args = parser.parse_args()
 # TODO write args to config file and store together with summaries (https://pypi.python.org/pypi/ConfigArgParse)
 args.train = not args.eval
 
+# Disable Tensorflow WARNING log
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu
 
 
