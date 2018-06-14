@@ -43,7 +43,8 @@ class A2CRunner():
     return self.cumulative_score / self.episode_counter
 
   def _print_agent_actions(self, actions):
-      print("sampled_actions: " + " ".join(map(str, actions)))
+    fn_ids, arg_ids = actions
+    print("Sampled action IDs: " + " ".join(map(str, fn_ids)))
 
   def _summarize_episode(self, timestep):
     score = timestep.observation["score_cumulative"][0]
