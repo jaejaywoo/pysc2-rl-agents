@@ -168,6 +168,11 @@ def mask_unused_argument_samples(actions):
   fn_id, arg_ids = actions
   for n in range(fn_id.shape[0]):
     a_0 = fn_id[n]
+
+    # TODO: Figure out the index problem! fn_id yields 524 as an action.
+    if a_0 == 524:
+      a_0 -= 1
+
     unused_types = set(ACTION_TYPES) - set(FUNCTIONS._func_list[a_0].args)
     for arg_type in unused_types:
       arg_ids[arg_type][n] = -1
