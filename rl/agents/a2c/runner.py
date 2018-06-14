@@ -149,6 +149,11 @@ def actions_to_pysc2(actions, size):
   for n in range(fn_id.shape[0]):
     a_0 = fn_id[n]
     a_l = []
+    
+    # TODO: Figure out the index problem! fn_id yields 524 as an action.
+    if a_0 == 524:
+      a_0 -= 1
+    
     for arg_type in FUNCTIONS._func_list[a_0].args:
       arg_id = arg_ids[arg_type][n]
       if is_spatial_action[arg_type]:
