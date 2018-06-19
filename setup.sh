@@ -13,6 +13,7 @@ sudo python3 get-pip.py
 sudo pip install virtualenv
 sudo pip install virtualenvwrapper
 
+cd $HOME
 echo "### User specific Configs ###" >> .bashrc
 echo "export LC_ALL='en_US.UTF-8'" >> .bashrc
 echo "export WORKON_HOME=$HOME/.virtualenvs" >> .bashrc
