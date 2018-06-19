@@ -56,5 +56,4 @@ pip install --user tensorflow
 
 # Install git and tmux
 sudo apt update
-sudo apt install git-all
 sudo apt-get install tmux
