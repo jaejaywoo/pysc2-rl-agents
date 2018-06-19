@@ -1,10 +1,5 @@
 #!/bin/bash
 
-# Create virtualenv
-mkvirtualenv --python=python3 pysc2
-pip install --user pysc2==1.2
-pip install --user tensorflow
-
 # Install StarCraft II API binary
 sudo apt-get install unzip
 mkdir -p .local/{lib,bin} && cd .local/lib
@@ -20,7 +15,8 @@ unzip mini_games.zip && rm -rf mini_games.zip
 
 cd $HOME
 echo "# StarCraftII path" >> .bashrc
-echo "export PATH=$HOME/.local/lib:$PATH" >> .bashrc
-echo "export PATH=$HOME/.local/bin:$PATH" >> .bashrc
+echo "export PATH=$HOME/.local/lib:$HOME/.local/bin:$PATH" >> .bashrc
 echo "export SC2PATH=$HOME/.local/lib/StarCraftII" >> .bashrc
 echo "" >> .bashrc
+
+echo "Reboot the shell by typing 'source ~/.bashrc'"
