@@ -79,7 +79,6 @@ class A2CRunner():
 
     for n in range(self.n_steps):
       actions, value_estimate = self.agent.step(last_obs)
-      self._print_agent_actions(actions)
       actions = mask_unused_argument_samples(actions)
       size = last_obs['screen'].shape[1:3]
 
@@ -157,10 +156,6 @@ def actions_to_pysc2(actions, size):
     a_0 = fn_id[n]
     a_l = []
 
-    # TODO: Figure out the index problem! fn_id yields 524 as an action.
-    if a_0 == 524:
-      a_0 -= 1
-
     for arg_type in FUNCTIONS._func_list[a_0].args:
       arg_id = arg_ids[arg_type][n]
       if is_spatial_action[arg_type]:
@@ -180,10 +175,6 @@ def mask_unused_argument_samples(actions):
   fn_id, arg_ids = actions
   for n in range(fn_id.shape[0]):
     a_0 = fn_id[n]
-
-    # TODO: Figure out the index problem! fn_id yields 524 as an action.
-    if a_0 == 524:
-      a_0 -= 1
 
     unused_types = set(ACTION_TYPES) - set(FUNCTIONS._func_list[a_0].args)
     for arg_type in unused_types:
