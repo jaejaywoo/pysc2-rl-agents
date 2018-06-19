@@ -97,7 +97,6 @@ class A2CRunner():
           score = self._summarize_episode(t)
           self.cumulative_score += score
 
-    print("\n\n")
     self.last_obs = last_obs
 
     next_values = self.agent.get_value(last_obs)
