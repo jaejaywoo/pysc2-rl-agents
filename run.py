@@ -2,7 +2,7 @@ import sys
 import os
 import shutil
 import sys
-import math
+from math import isnan
 import argparse
 from functools import partial
 from slacker import Slacker
