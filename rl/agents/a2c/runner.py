@@ -6,12 +6,13 @@ from pysc2.lib.actions import TYPES as ACTION_TYPES
 
 from rl.pre_processing import Preprocessor
 from rl.pre_processing import is_spatial_action, stack_ndarray_dicts
-
+from rl.util import send_notification
 
 class A2CRunner():
   def __init__(self,
                agent,
                envs,
+               slack,
                summary_writer=None,
                train=True,
                n_steps=8,
@@ -27,6 +28,7 @@ class A2CRunner():
     """
     self.agent = agent
     self.envs = envs
+    self.slack = slack
     self.summary_writer = summary_writer
     self.train = train
     self.n_steps = n_steps

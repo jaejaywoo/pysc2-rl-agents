@@ -2,8 +2,10 @@ import sys
 import os
 import shutil
 import sys
+import math
 import argparse
 from functools import partial
+from slacker import Slacker
 
 import tensorflow as tf
 
@@ -11,6 +13,7 @@ from rl.agents.a2c.runner import A2CRunner
 from rl.agents.a2c.agent import A2CAgent
 from rl.networks.fully_conv import FullyConv
 from rl.environment import SubprocVecEnv, make_sc2env, SingleEnv
+from rl.util import send_notification
 
 # Workaround for pysc2 flags
 from absl import flags
@@ -88,6 +91,10 @@ def _save_if_training(agent, summary_writer):
 
 
 def main():
+    # Get token for Slacker
+    token = raw_input("Where is the Slack token?")
+    slack = Slacker(token=token)
+
     # Create subdirs for each run in experiment
     if os.path.exists(summary_base):
         run_dirs = [os.path.join(summary_base, d) for d in os.listdir(summary_base)]
@@ -136,6 +143,7 @@ def main():
     runner = A2CRunner(
         envs=envs,
         agent=agent,
+        slack=slack,
         train=args.train,
         summary_writer=summary_writer,
         discount=args.discount,
@@ -168,6 +176,12 @@ def main():
           agent_step, loss, summary = result
           summary_writer.add_summary(summary, global_step=agent_step)
           print('iter %d: loss = %f' % (agent_step, loss))
+
+          # Check NaN
+          if isnan(loss):
+            warning = "The loss is NaN. Saving the model and stopping the instance at iter %d" % (agent_step)
+            send_notification(slack=slack, message=warning, channel='#sc2')
+            break
 
         i += 1
 
