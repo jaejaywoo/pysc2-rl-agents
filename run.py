@@ -92,7 +92,7 @@ def _save_if_training(agent, summary_writer):
 
 def main():
     # Get token for Slacker
-    token = raw_input("Where is the Slack token?")
+    token = input("Where is the Slack token?")
     slack = Slacker(token=token)
 
     # Create subdirs for each run in experiment
