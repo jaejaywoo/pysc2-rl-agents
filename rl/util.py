@@ -1,8 +1,5 @@
 import tensorflow as tf
 
-from slacker import Slacker
-slack = Slacker('xoxp-275696664358-274748830675-384999299284-224caf114267074764c46f9a03ca53a2')
-
 
 def safe_div(numerator, denominator, name="value"):
   """Computes a safe divide which returns 0 if the denominator is zero.
@@ -33,6 +30,6 @@ def safe_log(x):
       tf.zeros_like(x),
       tf.log(tf.maximum(1e-12, x)))
 
-def send_notification(message, channel):
+def send_notification(slack, message, channel):
   """Send notification to Slack channel (i.e. sc2)."""
   slack.chat.post_message(channel=channel, text=message, username="sc2 bot")
