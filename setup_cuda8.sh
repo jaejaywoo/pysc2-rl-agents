@@ -8,6 +8,7 @@ wget http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/$
 sudo dpkg -i ${CUDA_REPO_PKG}
 sudo apt-get update
 sudo apt-get -y install cuda-8-0
+sudo nvidia-smi -pm 1
 
 # install cuDNN v6.0
 CUDNN_TAR_FILE="cudnn-8.0-linux-x64-v6.0.tgz"
