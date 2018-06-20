@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # Install python2.7 and python 3.5
+cd $HOME
 sudo apt update
 sudo apt-get install tmux
 sudo apt install python python-dev python3 python3-dev

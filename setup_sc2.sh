@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # Install StarCraft II API binary
+cd $HOME
 sudo apt-get install unzip
 mkdir -p .local/{lib,bin} && cd .local/lib
 wget http://blzdistsc2-a.akamaihd.net/Linux/SC2.3.16.1.zip
