@@ -4,4 +4,4 @@
 rm -rf {rl/__pycache__,rl/agents/a2c/__pycache__,rl/networks/__pycache__}
 
 # Run
-python run.py collect_mineral_shards --eval --envs 16 --map CollectMineralShards
+python run.py collect_mineral_shards --save_iters 500 --nchw --envs 16 --map CollectMineralShards
