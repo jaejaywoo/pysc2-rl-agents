@@ -179,8 +179,10 @@ def main():
 
           # Check NaN
           if isnan(loss):
-            warning = "The loss is NaN. Saving the model and stopping the instance at iter %d" % (agent_step)
+            warning = "The loss of NaN detected. Saving the model and stopping the instance at iter %d" % (agent_step)
             send_notification(slack=slack, message=warning, channel='#sc2')
+            _saving_if_training(agent, summary_writer)
+            from pudb import set_trace; set_trace()
             break
 
         i += 1
