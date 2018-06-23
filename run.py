@@ -177,14 +177,6 @@ def main():
           summary_writer.add_summary(summary, global_step=agent_step)
           print('iter %d: loss = %f' % (agent_step, loss))
 
-          # Check NaN
-          if isnan(loss):
-            warning = "The loss of NaN detected. Saving the model and stopping the instance at iter %d" % (agent_step)
-            send_notification(slack=slack, message=warning, channel='#sc2')
-            _saving_if_training(agent, summary_writer)
-            from pudb import set_trace; set_trace()
-            break
-
         i += 1
 
         if 0 <= args.iters <= i:
