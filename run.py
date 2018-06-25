@@ -80,7 +80,8 @@ os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu
 
 ckpt_path = os.path.join(args.save_dir, args.experiment_id)
 summary_type = 'train' if args.train else 'eval'
-summary_base = os.path.join(args.summary_dir, args.experiment_id, summary_type)
+dir_name = '-'.join([args.experiment_id, 'lr%0.4f'%(args.lr)])
+summary_base = os.path.join(args.summary_dir, dir_name, summary_type)
 
 
 def _save_if_training(agent, summary_writer):
@@ -92,18 +93,16 @@ def _save_if_training(agent, summary_writer):
 
 def main():
     # Get token for Slacker
-    token = input("Where is the Slack token?")
+    token = os.environ['SLACK_API_TOKEN']
     slack = Slacker(token=token)
 
     # Create subdirs for each run in experiment
     if os.path.exists(summary_base):
         run_dirs = [os.path.join(summary_base, d) for d in os.listdir(summary_base)]
-        latest_run = int(max(run_dirs, key=os.path.getmtime).split('-')[0])
-        file_name = '-'.join(['%d'%(latest_run), 'A2C', 'lr%0.4f'%(args.lr)])
-        summary_path = os.path.join(summary_base, file_name)
+        latest_run = int(max(run_dirs, key=os.path.getmtime).split('-')[-1])
+        summary_path = os.path.join(summary_base, 'run-%d'%(latest_run + 1))
     else:
-        file_name = '-'.join(['1','A2C', 'lr%0.4f'%(args.lr)])
-        summary_path = os.path.join(summary_base, file_name)
+        summary_path = os.path.join(summary_base, 'run-1')
 
     # Overwrite experiment summaries
     if args.train and args.ow:
