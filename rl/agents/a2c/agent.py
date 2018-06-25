@@ -101,16 +101,23 @@ class A2CAgent():
     tf.summary.scalar('rl/advs', tf.reduce_mean(advs))
     self.loss = loss
 
-    global_step = tf.Variable(0, trainable=False)
+    global_step = tf.Variable(0, name='global_step', trainable=False)
     learning_rate = tf.train.exponential_decay(
         self.learning_rate, global_step,
         10000, 0.94)
+    tf.summary.scalar('train_op/global_step', global_step)
     tf.summary.scalar('train_op/learning_rate', learning_rate)
 
     opt = tf.train.RMSPropOptimizer(learning_rate=learning_rate,
                                     decay=0.99,
                                     epsilon=1e-5)
-
+    
+    self.train_op = opt.minimize(
+        loss=loss,
+        global_step=global_step,
+        name='train_op')
+ 
+    '''
     self.train_op = layers.optimize_loss(
         loss=loss,
         global_step=tf.train.get_global_step(),
@@ -118,7 +125,7 @@ class A2CAgent():
         clip_gradients=self.max_gradient_norm,
         learning_rate=None,
         name="train_op")
-
+    '''
     self.samples = sample_actions(available_actions, policy)
 
   def get_obs_feed(self, obs):
