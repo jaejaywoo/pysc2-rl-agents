@@ -98,10 +98,12 @@ def main():
     # Create subdirs for each run in experiment
     if os.path.exists(summary_base):
         run_dirs = [os.path.join(summary_base, d) for d in os.listdir(summary_base)]
-        latest_run = int(max(run_dirs, key=os.path.getmtime).split('-')[-1])
-        summary_path = os.path.join(summary_base, 'run-' + str(latest_run + 1))
+        latest_run = int(max(run_dirs, key=os.path.getmtime).split('-')[0])
+        file_name = '-'.join(['%d'%(latest_run), 'A2C', 'lr%0.4f'%(args.lr)])
+        summary_path = os.path.join(summary_base, file_name)
     else:
-        summary_path = os.path.join(summary_base, 'run-1')
+        file_name = '-'.join(['1','A2C', 'lr%0.4f'%(args.lr)])
+        summary_path = os.path.join(summary_base, file_name)
 
     # Overwrite experiment summaries
     if args.train and args.ow:
