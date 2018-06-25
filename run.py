@@ -177,6 +177,12 @@ def main():
           summary_writer.add_summary(summary, global_step=agent_step)
           print('iter %d: loss = %f' % (agent_step, loss))
 
+        if isnan(loss):
+          warning = 'NaN output detected from loss!' + \
+                    'Stopping the current run and start the next run at iter %d' % (agent_step)
+          send_notification(slack=slack, message=warning, channel='#sc2')
+          break
+
         i += 1
 
         if 0 <= args.iters <= i:
