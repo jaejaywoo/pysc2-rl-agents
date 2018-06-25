@@ -105,6 +105,7 @@ class A2CAgent():
     learning_rate = tf.train.exponential_decay(
         self.learning_rate, global_step,
         10000, 0.94)
+    tf.summary.scalar('train_op/learning_rate', learning_rate)
 
     opt = tf.train.RMSPropOptimizer(learning_rate=learning_rate,
                                     decay=0.99,
