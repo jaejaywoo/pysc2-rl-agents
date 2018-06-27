@@ -2,7 +2,7 @@
 
 # Remove all __pycache__ files
 rm -rf {rl/__pycache__,rl/agents/a2c/__pycache__,rl/networks/__pycache__}
-export SLACK_API_TOKEN='xoxp-275696664358-274748830675-387698274326-50e2ca47e516ddbfb9203e8c84363daa'
+export SLACK_API_TOKEN=''
 
 # Run
 #python run.py move_to_beacon                 --save_iters 500 --nchw --envs 16 --map MoveToBeacon
