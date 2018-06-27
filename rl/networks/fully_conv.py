@@ -113,21 +113,29 @@ class FullyConv():
                                  self.embed_spatial)
     flat_emb = self.embed_obs(flat_input, FLAT_FEATURES, self.embed_flat)
 
+    # conv/spatial obs
     screen_out = self.input_conv(self.from_nhwc(screen_emb), 'screen')
     minimap_out = self.input_conv(self.from_nhwc(minimap_emb), 'minimap')
 
+    # broadcast/non-spatial obs
     broadcast_out = self.broadcast_along_channels(flat_emb, size2d)
 
+    # spatial + non-spatial
     state_out = self.concat2d([screen_out, minimap_out, broadcast_out])
+
+    # TODO: ConvLSTM Implementation
 
     flat_out = layers.flatten(self.to_nhwc(state_out))
     fc = layers.fully_connected(flat_out, 256, activation_fn=tf.nn.relu)
 
+    # fc/value estimate
     value = layers.fully_connected(fc, 1, activation_fn=None)
     value = tf.reshape(value, [-1])
 
+    # fc/action_id
     fn_out = self.non_spatial_output(fc, NUM_FUNCTIONS)
 
+    # arguments
     args_out = dict()
     for arg_type in actions.TYPES:
       if is_spatial_action[arg_type]:
