@@ -2,7 +2,7 @@
 
 # Remove all __pycache__ files
 rm -rf {rl/__pycache__,rl/agents/a2c/__pycache__,rl/networks/__pycache__}
-export SLACK_API_TOKEN=''
+export SLACK_API_TOKEN='xoxp-275696664358-274748830675-387698274326-50e2ca47e516ddbfb9203e8c84363daa'
 
 # Run
 #python run.py move_to_beacon                 --save_iters 500 --nchw --envs 16 --map MoveToBeacon
@@ -11,3 +11,4 @@ export SLACK_API_TOKEN=''
 #python run.py defeat_roaches                 --save_iters 500 --nchw --envs 16 --map DefeatRoaches
 #python run.py defeat_zerglings_and_banelings --save_iters 500 --nchw --envs 16 --map DefeatZerglingsAndBanelings
 #python run.py collect_minerals_and_gas       --save_iters 500 --nchw --envs 16 --map CollectMineralsAndGas
+#python run.py build_marines                  --save_iters 500 --nchw --envs 16 --map BuildMarines
