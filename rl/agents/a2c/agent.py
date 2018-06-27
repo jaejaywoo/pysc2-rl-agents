@@ -30,8 +30,7 @@ class A2CAgent():
     self.network_data_format = network_data_format
     self.value_loss_weight = value_loss_weight
     self.entropy_weight = entropy_weight
-    self.learning_rate = round(
-        np.random.uniform(low=1e-5, high=1e-3), 4) # XXX Random Sample the learning rate
+    self.learning_rate = learning_rate
     self.max_gradient_norm = max_gradient_norm
     self.train_step = 0
     self.max_to_keep = max_to_keep

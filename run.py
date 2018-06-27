@@ -6,6 +6,7 @@ from math import isnan
 import argparse
 from functools import partial
 from slacker import Slacker
+from numpy import random
 
 import tensorflow as tf
 
@@ -77,6 +78,8 @@ args.train = not args.eval
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu
 
+# XXX Random sample learning rate
+args.lr = round(random.uniform(low=1e=-5, high=1e-3), 4)
 
 ckpt_path = os.path.join(args.save_dir, args.experiment_id)
 summary_type = 'train' if args.train else 'eval'
