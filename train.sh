@@ -11,3 +11,4 @@ export SLACK_API_TOKEN=''
 #python run.py defeat_roaches                 --save_iters 500 --nchw --envs 16 --map DefeatRoaches
 #python run.py defeat_zerglings_and_banelings --save_iters 500 --nchw --envs 16 --map DefeatZerglingsAndBanelings
 #python run.py collect_minerals_and_gas       --save_iters 500 --nchw --envs 16 --map CollectMineralsAndGas
+#python run.py build_marines                  --save_iters 500 --nchw --envs 16 --map BuildMarines
