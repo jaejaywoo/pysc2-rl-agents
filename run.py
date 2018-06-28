@@ -81,9 +81,9 @@ os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu
 # XXX Random sample learning rate
 args.lr = round(random.uniform(low=1e-5, high=1e-3), 5)
 
-ckpt_path = os.path.join(args.save_dir, args.experiment_id)
-summary_type = 'train' if args.train else 'eval'
 dir_name = '-'.join([args.experiment_id, 'lr%0.4f'%(args.lr)])
+ckpt_path = os.path.join(args.save_dir, dir_name)
+summary_type = 'train' if args.train else 'eval'
 summary_base = os.path.join(args.summary_dir, dir_name, summary_type)
 
 
