@@ -79,7 +79,11 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu
 
 # XXX Random sample learning rate
-args.lr = round(random.uniform(low=1e-5, high=1e-3), 5)
+if args.train:
+  args.lr = round(random.uniform(low=1e-5, high=1e-3), 5)
+else:
+  learning_rate = input("Please specify the learning rate you want to evaluate.\n")
+  args.lr = float(learning_rate)
 
 dir_name = '-'.join([args.experiment_id, 'lr%0.4f'%(args.lr)])
 ckpt_path = os.path.join(args.save_dir, dir_name)
