@@ -33,7 +33,7 @@ parser.add_argument('--ow', action='store_true',
                     help='overwrite existing experiments (if --train=True)')
 parser.add_argument('--map', type=str, default='MoveToBeacon',
                     help='name of SC2 map')
-parser.add_argument('--lstm', type=str, action='store_true',
+parser.add_argument('--lstm', action='store_true',
                     help='if true, implement FullyConvLSTM policy')
 parser.add_argument('--vis', action='store_true',
                     help='render with pygame')
