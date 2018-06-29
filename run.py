@@ -61,7 +61,7 @@ parser.add_argument('--summary_iters', type=int, default=10,
                     help='record training summary after this many iterations')
 parser.add_argument('--save_iters', type=int, default=5000,
                     help='store checkpoint after this many iterations')
-parser.add_argument('--max_to_keep', type=int, default=5,
+parser.add_argument('--max_to_keep', type=int, default=2,
                     help='maximum number of checkpoints to keep before discarding older ones')
 parser.add_argument('--entropy_weight', type=float, default=1e-3,
                     help='weight of entropy loss')
