@@ -77,10 +77,12 @@ class A2CRunner():
     all_actions = []
     all_scores = []
 
+    # TODO: Why do you save last_obs?
     last_obs = self.last_obs
+    lstm_state = self.agent.lstm_state_init if self.lstm else None
 
     for n in range(self.n_steps):
-      actions, value_estimate = self.agent.step(last_obs)
+      actions, value_estimate, lstm_state = self.agent.step(last_obs, lstm_state)
       actions = mask_unused_argument_samples(actions)
       size = last_obs['screen'].shape[1:3]
 
@@ -100,8 +102,7 @@ class A2CRunner():
           self.cumulative_score += score
 
     self.last_obs = last_obs
-
-    next_values = self.agent.get_value(last_obs)
+    next_values = self.agent.get_value(last_obs, lstm_state)
 
     returns, advs = compute_returns_advantages(
         rewards, dones, values, next_values, self.discount)
@@ -114,7 +115,8 @@ class A2CRunner():
     if self.train:
       return self.agent.train(
           obs, actions, returns, advs,
-          summary=train_summary)
+          summary=train_summary, lstm_state=lstm_state
+      )
 
     return None
 

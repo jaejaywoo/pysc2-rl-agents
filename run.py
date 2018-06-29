@@ -27,10 +27,14 @@ parser.add_argument('experiment_id', type=str,
                     help='identifier to store experiment results')
 parser.add_argument('--eval', action='store_true',
                     help='if false, episode scores are evaluated')
+parser.add_argument('--load', action='store_true',
+                    help='if true, loads the model from last ckpt and continue training')
 parser.add_argument('--ow', action='store_true',
                     help='overwrite existing experiments (if --train=True)')
 parser.add_argument('--map', type=str, default='MoveToBeacon',
                     help='name of SC2 map')
+parser.add_argument('--lstm', type=str, action='store_true',
+                    help='if true, implement FullyConvLSTM policy')
 parser.add_argument('--vis', action='store_true',
                     help='render with pygame')
 parser.add_argument('--max_windows', type=int, default=1,
@@ -78,11 +82,13 @@ args.train = not args.eval
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu
 
-# XXX Random sample learning rate
-if args.train:
+# Random sample learning rate
+if args.train and not args.load:
   args.lr = round(random.uniform(low=1e-5, high=1e-3), 5)
+elif not args.train and not args.load:
+  raise ValueError('Cannot evaluate an unsaved agent. Please retry with proper arguments.')
 else:
-  learning_rate = input("Please specify the learning rate you want to evaluate.\n")
+  learning_rate = input("Please specify the learning rate.\n")
   args.lr = float(learning_rate)
 
 dir_name = '-'.join([args.experiment_id, 'lr%0.4f'%(args.lr)])
@@ -145,7 +151,8 @@ def main():
         value_loss_weight=args.value_loss_weight,
         entropy_weight=args.entropy_weight,
         learning_rate=args.lr,
-        max_to_keep=args.max_to_keep)
+        max_to_keep=args.max_to_keep,
+        lstm=args.lstm)
 
     # Setup A2CAgent runner
     runner = A2CRunner(
