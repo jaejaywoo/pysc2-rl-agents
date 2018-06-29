@@ -93,9 +93,9 @@ else:
 
 # Specify model type
 if args.lstm:
-  dir_name = '-'.join([args.experiment_id, 'lstm', 'lr%0.4f'%(args.lr)])
+  dir_name = '-'.join([args.experiment_id, 'lstm', 'lr%0.5f'%(args.lr)])
 else:
-  dir_name = '-'.join([args.experiment_id, 'lr%0.4f'%(args.lr)])
+  dir_name = '-'.join([args.experiment_id, 'lr%0.5f'%(args.lr)])
 
 ckpt_path = os.path.join(args.save_dir, dir_name)
 summary_type = 'train' if args.train else 'eval'
