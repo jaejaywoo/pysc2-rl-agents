@@ -60,7 +60,7 @@ class A2CRunner():
     self.episode_counter += 1
     return score
 
-  def run_batch(self, train_summary=False):
+  def run_batch(self, train_summary=False, lstm=False):
     """Collect trajectories for a single batch and train (if self.train).
 
     Args:
@@ -79,7 +79,7 @@ class A2CRunner():
 
     # TODO: Why do you save last_obs?
     last_obs = self.last_obs
-    lstm_state = self.agent.lstm_state_init if self.lstm else None
+    lstm_state = self.agent.lstm_state_init if lstm else None
 
     for n in range(self.n_steps):
       actions, value_estimate, lstm_state = self.agent.step(last_obs, lstm_state)

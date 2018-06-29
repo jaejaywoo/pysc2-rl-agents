@@ -133,7 +133,7 @@ class FullyConv():
 
     # convolutional LSTM
     if self.lstm:
-      lstm_in = tf.reshape(self.to_nhwc(self.state_out), [1, -1, 32, 32, 75])
+      lstm_in = tf.reshape(self.to_nhwc(state_out), [1, -1, 32, 32, 75])
       lstm = tf.contrib.rnn.Conv2DLSTMCell(
         input_shape=[32, 32, 1],
         kernel_shape=[3, 3],
@@ -144,7 +144,7 @@ class FullyConv():
       self.state_init = [c_init, h_init]
 
       # TODO: step_size of 16? What is the sequence here?
-      step_size = tf.shape(self.state_out)[:1]  # Get step_size from input dimension
+      step_size = tf.shape(state_out)[:1]  # Get step_size from input dimension
       c_in, h_in = lstm_state_in
       state_in = tf.nn.rnn_cell.LSTMStateTuple(c_in, h_in)
       self.step_size = tf.placeholder(tf.float32, [1])

@@ -91,7 +91,12 @@ else:
   learning_rate = input("Please specify the learning rate.\n")
   args.lr = float(learning_rate)
 
-dir_name = '-'.join([args.experiment_id, 'lr%0.4f'%(args.lr)])
+# Specify model type
+if args.lstm:
+  dir_name = '-'.join([args.experiment_id, 'lstm', 'lr%0.4f'%(args.lr)])
+else:
+  dir_name = '-'.join([args.experiment_id, 'lr%0.4f'%(args.lr)])
+
 ckpt_path = os.path.join(args.save_dir, dir_name)
 summary_type = 'train' if args.train else 'eval'
 summary_base = os.path.join(args.summary_dir, dir_name, summary_type)
@@ -185,7 +190,7 @@ def main():
         if i > 0 and i % args.save_iters == 0:
           _save_if_training(agent, summary_writer)
 
-        result = runner.run_batch(train_summary=write_summary)
+        result = runner.run_batch(train_summary=write_summary, lstm=args.lstm)
 
         if write_summary:
           agent_step, loss, summary = result
