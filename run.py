@@ -9,6 +9,7 @@ from slacker import Slacker
 from numpy import random
 
 import tensorflow as tf
+from tensorflow.python import debug as tf_debug
 
 from rl.agents.a2c.runner import A2CRunner
 from rl.agents.a2c.agent import A2CAgent
@@ -142,11 +143,14 @@ def main():
     if num_no_vis > 0:
       env_fns.extend([partial(make_sc2env, **env_args)] * num_no_vis)
 
+    # Create envs
     envs = SubprocVecEnv(env_fns)
 
+    # Wrapper for tfdbg
     sess = tf.Session()
-    summary_writer = tf.summary.FileWriter(summary_path)
+    sess = tf_debug.TensorBoardDebugWrapperSession(sess, 'localhost:6064')
 
+    summary_writer = tf.summary.FileWriter(summary_path)
     network_data_format = 'NCHW' if args.nchw else 'NHWC'  # XXX NHWC -> NCHW
 
     # Create A2CAgent instance
