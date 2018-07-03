@@ -4,7 +4,7 @@
 cd $HOME
 sudo apt update
 sudo apt-get install tmux
-sudo apt install python python-dev python3 python3-dev
+sudo apt -y install python python-dev python3 python3-dev
 
 wget https://bootstrap.pypa.io/get-pip.py
 sudo python get-pip.py
