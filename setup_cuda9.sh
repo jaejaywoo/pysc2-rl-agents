@@ -12,6 +12,7 @@ sudo apt-get -y install cuda-9-0
 sudo nvidia-smi -pm 1
 
 # install cuDNN v7.1.4
+# The tar file has to be transferred from local machine
 tar -xzvf cudnn-9.0-linux-x64-v7.1.tgz
 sudo cp -P cuda/include/cudnn.h /usr/local/cuda-9.0/include
 sudo cp -P cuda/lib64/libcudnn* /usr/local/cuda-9.0/lib64
