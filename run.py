@@ -68,7 +68,7 @@ parser.add_argument('--entropy_weight', type=float, default=1e-3,
                     help='weight of entropy loss')
 parser.add_argument('--value_loss_weight', type=float, default=0.5,
                     help='weight of value function loss')
-parser.add_argument('--lr', type=float, default=7e-4,
+parser.add_argument('--lr', type=float, default=0.00095,
                     help='initial learning rate')
 parser.add_argument('--save_dir', type=str, default=os.path.join('out','models'),
                     help='root directory for checkpoint storage')
