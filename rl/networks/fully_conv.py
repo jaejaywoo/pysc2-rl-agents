@@ -97,29 +97,29 @@ class FullyConv():
       return tf.nn.softmax(logits)
 
   def concat2d(self, lst):
-      if self.data_format == 'NCHW':
-          return tf.concat(lst, axis=1)
+    if self.data_format == 'NCHW':
+        return tf.concat(lst, axis=1)
     return tf.concat(lst, axis=3)
 
   def broadcast_along_channels(self, flat, size2d):
-      if self.data_format == 'NCHW':
-          return tf.tile(tf.expand_dims(tf.expand_dims(flat, 2), 3),
-                         tf.stack([1, 1, size2d[0], size2d[1]]))
+    if self.data_format == 'NCHW':
+        return tf.tile(tf.expand_dims(tf.expand_dims(flat, 2), 3),
+                       tf.stack([1, 1, size2d[0], size2d[1]]))
     return tf.tile(tf.expand_dims(tf.expand_dims(flat, 1), 2),
                    tf.stack([1, size2d[0], size2d[1], 1]))
 
   def to_nhwc(self, map2d):
-      if self.data_format == 'NCHW':
-          return tf.transpose(map2d, [0, 2, 3, 1])
+    if self.data_format == 'NCHW':
+        return tf.transpose(map2d, [0, 2, 3, 1])
     return map2d
 
   def from_nhwc(self, map2d):
-      if self.data_format == 'NCHW':
-          return tf.transpose(map2d, [0, 3, 1, 2])
+    if self.data_format == 'NCHW':
+        return tf.transpose(map2d, [0, 3, 1, 2])
     return map2d
 
   def build(self, screen_input, minimap_input, flat_input, lstm_state_in=None):
-      """Build A2C policy model.
+    """Build A2C policy model.
 
     Args:
         screen_input: [None, 32, 32, 17]
