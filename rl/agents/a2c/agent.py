@@ -133,6 +133,7 @@ class A2CAgent():
                                     decay=0.99,
                                     epsilon=1e-5)
 
+    '''
     self.train_op = opt.minimize(
         loss=loss,
         global_step=global_step,
@@ -141,12 +142,12 @@ class A2CAgent():
     '''
     self.train_op = layers.optimize_loss(
         loss=loss,
-        global_step=tf.train.get_global_step(),
+        global_step=global_step,
         optimizer=opt,
         clip_gradients=self.max_gradient_norm,
         learning_rate=None,
         name="train_op")
-    '''
+
     self.samples = sample_actions(available_actions, policy)
 
   def get_obs_feed(self, obs):
