@@ -9,7 +9,6 @@ from slacker import Slacker
 from numpy import random
 
 import tensorflow as tf
-from tensorflow.python import debug as tf_debug
 
 from rl.agents.a2c.runner import A2CRunner
 from rl.agents.a2c.agent import A2CAgent
@@ -86,13 +85,13 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu
 
 # Random sample learning rate
-if args.train and not args.load:
-  args.lr = round(random.uniform(low=1e-5, high=1e-3), 5)
-elif not args.train and not args.load:
-  raise ValueError('Cannot evaluate an unsaved agent. Please retry with proper arguments.')
-else:
-  learning_rate = input("Please specify the learning rate.\n")
-  args.lr = float(learning_rate)
+#if args.train and not args.load:
+#  args.lr = round(random.uniform(low=1e-5, high=1e-3), 5)
+#elif not args.train and not args.load:
+#  raise ValueError('Cannot evaluate an unsaved agent. Please retry with proper arguments.')
+#else:
+#  learning_rate = input("Please specify the learning rate.\n")
+#  args.lr = float(learning_rate)
 
 # Specify model type
 if args.lstm:
@@ -148,7 +147,6 @@ def main():
     # Create envs
     envs = SubprocVecEnv(env_fns)
 
-    # Wrapper for tfdbg
     sess = tf.Session()
     if args.debug:
       sess = tf_debug.LocalCLIDebugWrapperSession(sess)

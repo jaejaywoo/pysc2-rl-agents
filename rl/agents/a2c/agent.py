@@ -245,7 +245,6 @@ class A2CAgent():
     self.train_step = int(ckpt.model_checkpoint_path.split('-')[-1])
     print("Loaded agent at train_step %d" % self.train_step)
 
-
 def mask_unavailable_actions(available_actions, fn_pi):
   fn_pi *= available_actions
   fn_pi /= tf.reduce_sum(fn_pi, axis=1, keepdims=True)
