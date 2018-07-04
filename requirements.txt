@@ -1,4 +1,5 @@
 absl-py==0.2.2
+astor==0.6.2
 bleach==1.5.0
 blessings==1.6.1
 certifi==2018.4.16
@@ -6,7 +7,9 @@ chardet==3.0.4
 enum34==1.1.6
 future==0.16.0
 futures==3.1.1
+gast==0.2.0
 gpustat==0.4.1
+grpcio==1.13.0
 html5lib==0.9999999
 idna==2.7
 Markdown==2.6.11
@@ -26,8 +29,11 @@ requests==2.19.1
 s2clientprotocol==4.3.2.65384.0
 six==1.11.0
 slacker==0.9.65
+tb-nightly==1.10.0a20180704
+tensorboard==1.8.0
 tensorflow-gpu==1.8.0
 tensorflow-tensorboard==0.4.0
+termcolor==1.1.0
 urllib3==1.23
 urwid==2.0.1
 websocket-client==0.48.0
