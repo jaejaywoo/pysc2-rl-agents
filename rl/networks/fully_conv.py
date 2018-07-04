@@ -19,7 +19,7 @@ class FullyConv():
     self.data_format = data_format
     self.lstm = lstm
 
-  def embed_obs(self, x, spec, embed_fn):
+  def embed_obs(self, x, spec, embed_fn, name):
     feats = tf.split(x, len(spec), -1)
     out_list = []
     for s in spec:
@@ -28,7 +28,7 @@ class FullyConv():
         dims = np.round(np.log2(s.scale)).astype(np.int32).item()
         dims = max(dims, 1)
         indices = tf.one_hot(tf.to_int32(tf.squeeze(f, -1)), s.scale)
-        out = embed_fn(indices, dims)
+        out = embed_fn(indices, dims, name)
       elif s.type == features.FeatureType.SCALAR:
         out = self.log_transform(f, s.scale)
       else:
@@ -39,7 +39,7 @@ class FullyConv():
   def log_transform(self, x, scale):
     return tf.log(x + 1.)
 
-  def embed_spatial(self, x, dims):
+  def embed_spatial(self, x, dims, name):
     x = self.from_nhwc(x)
     out = layers.conv2d(
         x, dims,
@@ -47,7 +47,8 @@ class FullyConv():
         stride=1,
         padding='SAME',
         activation_fn=tf.nn.relu,
-        data_format=self.data_format)
+        data_format=self.data_format,
+        scope="embed_%s/conv1" % name)
     return self.to_nhwc(out)
 
   def embed_flat(self, x, dims):
@@ -116,9 +117,9 @@ class FullyConv():
     """
     size2d = tf.unstack(tf.shape(screen_input)[1:3])
     screen_emb = self.embed_obs(screen_input, features.SCREEN_FEATURES,  # NHWC: [None, 32, 32, 35]
-                                self.embed_spatial)
+                                self.embed_spatial, "screen")
     minimap_emb = self.embed_obs(minimap_input, features.MINIMAP_FEATURES,  # NHWC: [None, 32, 32, 12]
-                                 self.embed_spatial)
+                                 self.embed_spatial, "minimap")
     flat_emb = self.embed_obs(flat_input, FLAT_FEATURES, self.embed_flat)  # NHWC: [None, 11]
 
     # conv/spatial obs
