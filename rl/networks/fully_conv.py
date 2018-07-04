@@ -22,13 +22,13 @@ class FullyConv():
   def embed_obs(self, x, spec, embed_fn, name):
     feats = tf.split(x, len(spec), -1)
     out_list = []
-    for s in spec:
+    for i, s in enumerate(spec):
       f = feats[s.index]
       if s.type == features.FeatureType.CATEGORICAL:
         dims = np.round(np.log2(s.scale)).astype(np.int32).item()
         dims = max(dims, 1)
         indices = tf.one_hot(tf.to_int32(tf.squeeze(f, -1)), s.scale)
-        out = embed_fn(indices, dims, name)
+        out = embed_fn(indices, dims, name, i)
       elif s.type == features.FeatureType.SCALAR:
         out = self.log_transform(f, s.scale)
       else:
@@ -39,88 +39,99 @@ class FullyConv():
   def log_transform(self, x, scale):
     return tf.log(x + 1.)
 
-  def embed_spatial(self, x, dims, name):
-    x = self.from_nhwc(x)
-    out = layers.conv2d(
-        x, dims,
-        kernel_size=1,
-        stride=1,
-        padding='SAME',
-        activation_fn=tf.nn.relu,
-        data_format=self.data_format,
-        scope="embed_%s/conv1" % name)
-    return self.to_nhwc(out)
+  def embed_spatial(self, x, dims, name, i):
+      x = self.from_nhwc(x)
+      out = layers.conv2d(
+          x, dims,
+          kernel_size=1,
+          stride=1,
+          padding='SAME',
+          activation_fn=tf.nn.relu,
+          data_format=self.data_format,
+          scope="embed-%s/conv_%d"%(name,i))
+      return self.to_nhwc(out)
 
-  def embed_flat(self, x, dims):
-    return layers.fully_connected(
-        x, dims,
-        activation_fn=tf.nn.relu)
+  def embed_flat(self, x, dims, name, i):
+      return layers.fully_connected(
+          x, dims,
+          activation_fn=tf.nn.relu,
+          scope="embed-%s/fc_%d"%(name,i))
 
   def input_conv(self, x, name):
-    conv1 = layers.conv2d(
-        x, 16,
-        kernel_size=5,
-        stride=1,
-        padding='SAME',
-        activation_fn=tf.nn.relu,
-        data_format=self.data_format,
-        scope="%s/conv1" % name)
-    conv2 = layers.conv2d(
-        conv1, 32,
-        kernel_size=3,
-        stride=1,
-        padding='SAME',
-        activation_fn=tf.nn.relu,
-        data_format=self.data_format,
-        scope="%s/conv2" % name)
-    return conv2
+      conv1 = layers.conv2d(
+          x, 16,
+          kernel_size=5,
+          stride=1,
+          padding='SAME',
+          activation_fn=tf.nn.relu,
+          data_format=self.data_format,
+          scope="%s/conv1"%name)
+      conv2 = layers.conv2d(
+          conv1, 32,
+          kernel_size=3,
+          stride=1,
+          padding='SAME',
+          activation_fn=tf.nn.relu,
+          data_format=self.data_format,
+          scope="%s/conv2"%name)
+      return conv2
 
-  def non_spatial_output(self, x, channels):
-    logits = layers.fully_connected(x, channels, activation_fn=None)
-    return tf.nn.softmax(logits)
+  def non_spatial_output(self, x, channels, name):
+      logits = layers.fully_connected(
+          x, channels,
+          activation_fn=None,
+          scope="non-spatial-%s/fc"%name)
+      return tf.nn.softmax(logits)
 
-  def spatial_output(self, x):
-    logits = layers.conv2d(x, 1, kernel_size=1, stride=1, activation_fn=None,
-                           data_format=self.data_format)
-    logits = layers.flatten(self.to_nhwc(logits))
-    return tf.nn.softmax(logits)
+  def spatial_output(self, x, name):
+      logits = layers.conv2d(
+          x, 1,
+          kernel_size=1,
+          stride=1,
+          activation_fn=None,
+          data_format=self.data_format,
+          scope="spatial-%s/conv"%name)
+      logits = layers.flatten(
+          self.to_nhwc(logits),
+          scope="spatial-%s/flatten"%name)
+      return tf.nn.softmax(logits)
 
   def concat2d(self, lst):
-    if self.data_format == 'NCHW':
-      return tf.concat(lst, axis=1)
+      if self.data_format == 'NCHW':
+          return tf.concat(lst, axis=1)
     return tf.concat(lst, axis=3)
 
   def broadcast_along_channels(self, flat, size2d):
-    if self.data_format == 'NCHW':
-      return tf.tile(tf.expand_dims(tf.expand_dims(flat, 2), 3),
-                     tf.stack([1, 1, size2d[0], size2d[1]]))
+      if self.data_format == 'NCHW':
+          return tf.tile(tf.expand_dims(tf.expand_dims(flat, 2), 3),
+                         tf.stack([1, 1, size2d[0], size2d[1]]))
     return tf.tile(tf.expand_dims(tf.expand_dims(flat, 1), 2),
                    tf.stack([1, size2d[0], size2d[1], 1]))
 
   def to_nhwc(self, map2d):
-    if self.data_format == 'NCHW':
-      return tf.transpose(map2d, [0, 2, 3, 1])
+      if self.data_format == 'NCHW':
+          return tf.transpose(map2d, [0, 2, 3, 1])
     return map2d
 
   def from_nhwc(self, map2d):
-    if self.data_format == 'NCHW':
-      return tf.transpose(map2d, [0, 3, 1, 2])
+      if self.data_format == 'NCHW':
+          return tf.transpose(map2d, [0, 3, 1, 2])
     return map2d
 
   def build(self, screen_input, minimap_input, flat_input, lstm_state_in=None):
-    """Build A2C policy model.
+      """Build A2C policy model.
 
     Args:
-      screen_input: [None, 32, 32, 17]
-      minimap_input: [None, 32, 32, 7]
-      flat_input: [None, 11]
-    """
+        screen_input: [None, 32, 32, 17]
+        minimap_input: [None, 32, 32, 7]
+        flat_input: [None, 11]
+        """
     size2d = tf.unstack(tf.shape(screen_input)[1:3])
     screen_emb = self.embed_obs(screen_input, features.SCREEN_FEATURES,  # NHWC: [None, 32, 32, 35]
                                 self.embed_spatial, "screen")
     minimap_emb = self.embed_obs(minimap_input, features.MINIMAP_FEATURES,  # NHWC: [None, 32, 32, 12]
                                  self.embed_spatial, "minimap")
-    flat_emb = self.embed_obs(flat_input, FLAT_FEATURES, self.embed_flat)  # NHWC: [None, 11]
+    flat_emb = self.embed_obs(flat_input, FLAT_FEATURES, self.embed_flat, "flat")  # NHWC: [None, 11]
 
     # conv/spatial obs
     screen_out = self.input_conv(self.from_nhwc(screen_emb), 'screen')     # NCHW: [None, 32, 32, 32]
@@ -160,29 +171,33 @@ class FullyConv():
 
       lstm_c, lstm_h = state
       lstm_state_out = (lstm_c[:1, :], lstm_h[:1, :])
-      flat_out = tf.reshape(outputs, [-1, 76800])  # 32*32*75
+      flat_out = tf.reshape(outputs, [-1, 76800], name="state/flatten")  # 32*32*75
       lstm_out = tf.reshape(outputs, [-1, 32, 32, 75])
     else:
-      flat_out = layers.flatten(self.to_nhwc(state_out))
-    fc = layers.fully_connected(flat_out, 256, activation_fn=tf.nn.relu)   # [None, 256]
+      flat_out = layers.flatten(self.to_nhwc(state_out), scope="state/flatten")
+    fc = layers.fully_connected(flat_out, 256, activation_fn=tf.nn.relu,
+                                scope="state/fc")   # [None, 256]
 
     # fc/value estimate
-    value = layers.fully_connected(fc, 1, activation_fn=None)              # [None, 1]
-    value = tf.reshape(value, [-1])                                        # [None]
+    value = layers.fully_connected(fc, 1, activation_fn=None,
+                                   scope="value/fc")                       # [None, 1]
+    value = tf.reshape(value, [-1], name="value")                          # [None]
 
     # fc/action_id
-    fn_out = self.non_spatial_output(fc, NUM_FUNCTIONS)                    # [None, 524]
+    fn_out = self.non_spatial_output(fc, NUM_FUNCTIONS, "action_id")       # [None, 524]
 
     # arguments
     args_out = dict()
     for arg_type in actions.TYPES:
       if is_spatial_action[arg_type]:
         if self.lstm:
-          arg_out = self.spatial_output(self.from_nhwc(lstm_out))            # [None, 1024]
+          arg_out = self.spatial_output(self.from_nhwc(lstm_out),
+                                        arg_type.name)                     # [None, 1024]
         else:
-          arg_out = self.spatial_output(state_out)                         # [None, 1024]
+          arg_out = self.spatial_output(state_out, arg_type.name)          # [None, 1024]
       else:
-        arg_out = self.non_spatial_output(fc, arg_type.sizes[0])           # [None, 2/4/5/10/500]
+        arg_out = self.non_spatial_output(fc, arg_type.sizes[0],
+                                          arg_type.name)                   # [None, 2/4/5/10/500]
       args_out[arg_type] = arg_out
 
     policy = (fn_out, args_out)
