@@ -9,6 +9,7 @@ from slacker import Slacker
 from numpy import random
 
 import tensorflow as tf
+from tensorflow.python import debug as tf_debug
 
 from rl.agents.a2c.runner import A2CRunner
 from rl.agents.a2c.agent import A2CAgent
