@@ -1,3 +1,4 @@
+import numpy as np
 import tensorflow as tf
 
 
@@ -29,6 +30,12 @@ def safe_log(x):
       tf.equal(x, 0),
       tf.zeros_like(x),
       tf.log(tf.maximum(1e-12, x)))
+
+
+def has_nan_or_inf(datum, tensor):
+  """Returns true if the tensor contains NaN or inf."""
+  return np.any(np.isnan(tensor)) or np.any(np.isinf(tensor))
+
 
 def send_notification(slack, message, channel):
   """Send notification to Slack channel (i.e. sc2)."""

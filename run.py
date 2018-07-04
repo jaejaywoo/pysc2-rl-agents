@@ -15,7 +15,7 @@ from rl.agents.a2c.runner import A2CRunner
 from rl.agents.a2c.agent import A2CAgent
 from rl.networks.fully_conv import FullyConv
 from rl.environment import SubprocVecEnv, make_sc2env, SingleEnv
-from rl.util import send_notification
+from rl.util import has_nan_or_inf, send_notification
 
 # Workaround for pysc2 flags
 from absl import flags
@@ -30,6 +30,8 @@ parser.add_argument('--eval', action='store_true',
                     help='if false, episode scores are evaluated')
 parser.add_argument('--load', action='store_true',
                     help='if true, loads the model from last ckpt and continue training')
+parser.add_argument('--debug', action='store_true',
+                    help='if true, deploy Tensorflow debugger wrapper')
 parser.add_argument('--ow', action='store_true',
                     help='overwrite existing experiments (if --train=True)')
 parser.add_argument('--map', type=str, default='MoveToBeacon',
@@ -148,7 +150,9 @@ def main():
 
     # Wrapper for tfdbg
     sess = tf.Session()
-    sess = tf_debug.TensorBoardDebugWrapperSession(sess, 'localhost:6064')
+    if args.debug:
+      sess = tf_debug.LocalCLIDebugWrapperSession(sess)
+      sess.add_tensor_filter('has_nan_or_inf', has_nan_or_inf)
 
     summary_writer = tf.summary.FileWriter(summary_path)
     network_data_format = 'NCHW' if args.nchw else 'NHWC'  # XXX NHWC -> NCHW
@@ -204,8 +208,8 @@ def main():
         if isnan(loss):
           warning = 'NaN output detected from loss!' + \
                     'Stopping the current run and start the next run at iter %d' % (agent_step)
-          send_notification(slack=slack, message=warning, channel='#sc2')
-          break
+          #send_notification(slack=slack, message=warning, channel='#sc2')
+          #break
 
         i += 1
 
