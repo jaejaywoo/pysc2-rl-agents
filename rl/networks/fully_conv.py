@@ -167,12 +167,13 @@ class FullyConv():
           sequence_length=step_size,  # XXX Maybe optional?
           initial_state=state_in,
           time_major=False,
-          dtype=tf.float32)
+          dtype=tf.float32,
+          scope="lstm-dynamic")
 
       lstm_c, lstm_h = state
       lstm_state_out = (lstm_c[:1, :], lstm_h[:1, :])
-      flat_out = tf.reshape(outputs, [-1, 76800], name="state/flatten")  # 32*32*75
-      lstm_out = tf.reshape(outputs, [-1, 32, 32, 75])
+      flat_out = tf.reshape(outputs, [-1, 76800], name="lstm-state/flatten")  # 32*32*75
+      lstm_out = tf.reshape(outputs, [-1, 32, 32, 75], name="lstm-state-spatial")
     else:
       flat_out = layers.flatten(self.to_nhwc(state_out), scope="state/flatten")
     fc = layers.fully_connected(flat_out, 256, activation_fn=tf.nn.relu,
