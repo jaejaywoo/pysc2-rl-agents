@@ -35,13 +35,14 @@ class A2CRunner():
     self.discount = discount
     self.preproc = Preprocessor(self.envs.observation_spec()[0])
     self.episode_counter = 0
-    self.mean_counter = 1
+    self.mean_counter = 0
     self.mean_score = 0.0
     self.cumulative_score = 0.0
 
   def reset(self):
     obs_raw = self.envs.reset()
     self.last_obs = self.preproc.preprocess_obs(obs_raw)
+    self.episode_last = [None for i in range(self.envs.n_envs)]
 
   def get_mean_score(self):
     return self.cumulative_score / self.episode_counter
@@ -70,6 +71,7 @@ class A2CRunner():
       self.summary_writer.add_summary(summary, self.mean_counter)
 
     print("step %d: mean score = %f" % (self.mean_counter, score))
+    self.episode_last = [None for i in range(self.envs.n_envs)]
     self.mean_counter += 1
 
   def run_batch(self, train_summary=False, lstm=False):
@@ -108,15 +110,17 @@ class A2CRunner():
       rewards[n, :] = [t.reward for t in obs_raw]
       dones[n, :] = [t.last() for t in obs_raw]
 
-      for t in obs_raw:
+      for i, t in enumerate(obs_raw):
         if t.last():
           score = self._summarize_episode(t)
           self.cumulative_score += score
           self.mean_score += score
+          self.episode_last[i] = t.last()
 
     # Get episode mean score of workers
-    self._summarize_mean(self.mean_score)
-    self.mean_score = 0
+    if all(self.episode_last):
+      self._summarize_mean(self.mean_score)
+      self.mean_score = 0
 
     self.last_obs = last_obs
     next_values = self.agent.get_value(last_obs, lstm_state)
