@@ -66,7 +66,7 @@ class A2CRunner():
     score /= self.envs.n_envs
     if self.summary_writer is not None:
       summary = tf.Summary()
-      summary.value.add(tag='sc2/mean_score_score', simple_value=score)
+      summary.value.add(tag='sc2/mean_score', simple_value=score)
       self.summary_writer.add_summary(summary, self.mean_counter)
 
     print("step %d: mean score = %f" % (self.mean_counter, score))
