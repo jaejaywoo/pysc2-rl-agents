@@ -10,6 +10,7 @@ sudo apt-key adv --fetch-keys http://developer.download.nvidia.com/compute/cuda/
 sudo apt-get update
 sudo apt-get -y install cuda-9-0
 sudo nvidia-smi -pm 1
+<<<<<<< Updated upstream
 
 # install cuDNN v7.1.4
 # The tar file has to be transferred from local machine

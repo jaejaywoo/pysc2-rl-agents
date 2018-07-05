@@ -35,6 +35,8 @@ class A2CRunner():
     self.discount = discount
     self.preproc = Preprocessor(self.envs.observation_spec()[0])
     self.episode_counter = 0
+    self.mean_counter = 1
+    self.mean_score = 0.0
     self.cumulative_score = 0.0
 
   def reset(self):
@@ -59,6 +61,16 @@ class A2CRunner():
     print("episode %d: score = %f" % (self.episode_counter, score))
     self.episode_counter += 1
     return score
+
+  def _summarize_mean(self, score):
+    score /= self.envs.n_envs
+    if self.summary_writer is not None:
+      summary = tf.Summary()
+      summary.value.add(tag='sc2/mean_score_score', simple_value=score)
+      self.summary_writer.add_summary(summary, self.mean_counter)
+
+    print("step %d: mean score = %f" % (self.mean_counter, score))
+    self.mean_counter += 1
 
   def run_batch(self, train_summary=False, lstm=False):
     """Collect trajectories for a single batch and train (if self.train).
@@ -100,6 +112,11 @@ class A2CRunner():
         if t.last():
           score = self._summarize_episode(t)
           self.cumulative_score += score
+          self.mean_score += score
+
+    # Get episode mean score of workers
+    self._summarize_mean(self.mean_score)
+    self.mean_score = 0
 
     self.last_obs = last_obs
     next_values = self.agent.get_value(last_obs, lstm_state)
