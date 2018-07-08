@@ -28,6 +28,7 @@ class A2CAgent():
                lstm=False):
     self.sess = sess
     self.lstm = lstm
+    self.train = train
     self.network_cls = network_cls
     self.network_data_format = network_data_format
     self.value_loss_weight = value_loss_weight
@@ -267,8 +268,8 @@ def compute_policy_entropy(available_actions, policy, actions):
   _, arg_ids = actions
 
   fn_pi, arg_pis = policy
-  fn_pi = mask_unavailable_actions(available_actions, fn_pi)
-  entropy = tf.reduce_mean(compute_entropy(fn_pi))
+  fn_pi = mask_unavailable_actions(available_actions, fn_pi)  # [None, 524]
+  entropy = tf.reduce_mean(compute_entropy(fn_pi))  # XXX NaN spotted
   tf.summary.scalar('entropy/fn', entropy)
 
   for arg_type in arg_ids.keys():
@@ -290,7 +291,7 @@ def sample_actions(available_actions, policy):
   """Sample function ids and arguments from a predicted policy."""
 
   def sample(probs):
-    dist = Categorical(probs=probs)
+    dist = Categorical(probs=probs)  # XXX Categorical/logits/Log:0: NaN
     return dist.sample()
 
   fn_pi, arg_pis = policy

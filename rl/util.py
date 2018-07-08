@@ -26,10 +26,15 @@ def safe_div(numerator, denominator, name="value"):
 
 def safe_log(x):
   """Computes a safe logarithm which returns 0 if x is zero."""
-  return tf.where(
+  result = tf.where(
       tf.equal(x, 0),
       tf.zeros_like(x),
       tf.log(tf.maximum(1e-12, x)))
+  is_nan = tf.reduce_any(tf.is_nan(result))
+  if is_nan:
+    result = tf.Print(result, [result],
+      message="NaN detected at 'pysc2-rl-agents/rl/util.py/safe_log'\n")
+  return result
 
 
 def has_nan_or_inf(datum, tensor):
