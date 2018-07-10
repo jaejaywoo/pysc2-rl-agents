@@ -17,6 +17,9 @@ sudo pip install virtualenvwrapper
 cd $HOME
 echo "### User specific Configs ###" >> .bashrc
 echo "export LC_ALL='en_US.UTF-8'" >> .bashrc
+echo "set noswapfile" >> .bashrc
+echo "" >> .bashrc
+echo "# VIRTUALENVWRAPPER" >> .bashrc
 echo "export WORKON_HOME=$HOME/.virtualenvs" >> .bashrc
 echo "export PROJECT_HOME=$HOME/Devel" >> .bashrc
 echo "export VIRTUALENVWRAPPER_PYTHON=/usr/bin/python3" >> .bashrc
