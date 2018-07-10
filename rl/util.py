@@ -2,6 +2,12 @@ import numpy as np
 import tensorflow as tf
 
 
+def tf_print(tensor, name):
+  return tf.Print(tensor, [tensor],
+      summarize=10000,
+      message='{} tensor:\n'.format(name))
+
+
 def safe_div(numerator, denominator, name="value"):
   """Computes a safe divide which returns 0 if the denominator is zero.
   Note that the function contains an additional conditional check that is
@@ -30,10 +36,11 @@ def safe_log(x):
       tf.equal(x, 0),
       tf.zeros_like(x),
       tf.log(tf.maximum(1e-12, x)))
-  is_nan = tf.reduce_any(tf.is_nan(result))
-  if is_nan:
-    result = tf.Print(result, [result],
-      message="NaN detected at 'pysc2-rl-agents/rl/util.py/safe_log'\n")
+  #result = tf.cond(
+  #    tf.reduce_any(tf.is_nan(result)),
+  #    true_fn=lambda: tf.Print(result, [result], message="NaN detected at 'pysc2-rl-agents/rl/util.py/safe_log'\n"),
+  #    false_fn=lambda: result)
+  #result = tf.Print(result, [result], summarize=16*524, message="safe_log tensors:\n") 
   return result
 
 
