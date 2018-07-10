@@ -149,7 +149,7 @@ class A2CAgent():
         clip_gradients=self.max_gradient_norm,
         learning_rate=None,
         name="train_op")
-    
+
     if self.debug:
       self.check_op = tf.add_check_numerics_ops()
 
@@ -190,20 +190,16 @@ class A2CAgent():
           self.lstm_state_in[0]: lstm_state[0],
           self.lstm_state_in[1]: lstm_state[1]
       })
-    ops = [self.train_op, self.loss]
+    ops = [self.train_op, self.loss, self.train_summary_op]
 
-    if summary:
-      ops.append(self.train_summary_op)
-    
     if self.debug:
       ops.append(self.check_op)
-
-    *res, _ = self.sess.run(ops, feed_dict=feed_dict)
+      *res, _ = self.sess.run(ops, feed_dict=feed_dict)
+    else:
+      res = self.sess.run(ops, feed_dict=feed_dict)
     agent_step = self.train_step
     self.train_step += 1
-
-    if summary:
-      return (agent_step, res[1], res[-1])
+    return (agent_step, res[1], res[-1])
 
   def step(self, obs, lstm_state=None):
     """
