@@ -226,10 +226,6 @@ class A2CAgent():
         self.lstm_state_in[1]: lstm_state[1]
         })
       return self.sess.run(ops, feed_dict=feed_dict)
-   
-    if self.debug:
-      ops.append(self.check_op) 
-
     actions, value = self.sess.run(ops, feed_dict=feed_dict)
     return actions, value, None
 
