@@ -198,7 +198,7 @@ class A2CAgent():
     if self.debug:
       ops.append(self.check_op)
 
-    res = self.sess.run(ops, feed_dict=feed_dict)
+    *res, _ = self.sess.run(ops, feed_dict=feed_dict)
     agent_step = self.train_step
     self.train_step += 1
 
