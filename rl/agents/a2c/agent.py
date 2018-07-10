@@ -8,7 +8,7 @@ from tensorflow.contrib.distributions import Categorical
 from pysc2.lib.actions import TYPES as ACTION_TYPES
 
 from rl.networks.fully_conv import FullyConv
-from rl.util import safe_log, safe_div
+from rl.util import tf_print, safe_log, safe_div
 
 
 class A2CAgent():
@@ -18,6 +18,7 @@ class A2CAgent():
   """
   def __init__(self,
                sess,
+               debug=False,
                network_cls=FullyConv,
                network_data_format='NCHW',
                value_loss_weight=0.5,
@@ -28,7 +29,7 @@ class A2CAgent():
                lstm=False):
     self.sess = sess
     self.lstm = lstm
-    self.train = train
+    self.debug = debug
     self.network_cls = network_cls
     self.network_data_format = network_data_format
     self.value_loss_weight = value_loss_weight
@@ -148,6 +149,9 @@ class A2CAgent():
         clip_gradients=self.max_gradient_norm,
         learning_rate=None,
         name="train_op")
+    
+    if self.debug:
+      self.check_op = tf.add_check_numerics_ops()
 
     self.samples = sample_actions(available_actions, policy)
 
@@ -190,6 +194,9 @@ class A2CAgent():
 
     if summary:
       ops.append(self.train_summary_op)
+    
+    if self.debug:
+      ops.append(self.check_op)
 
     res = self.sess.run(ops, feed_dict=feed_dict)
     agent_step = self.train_step
@@ -219,6 +226,10 @@ class A2CAgent():
         self.lstm_state_in[1]: lstm_state[1]
         })
       return self.sess.run(ops, feed_dict=feed_dict)
+   
+    if self.debug:
+      ops.append(self.check_op) 
+
     actions, value = self.sess.run(ops, feed_dict=feed_dict)
     return actions, value, None
 
@@ -262,14 +273,23 @@ def compute_policy_entropy(available_actions, policy, actions):
     entropy: a scalar float tensor.
   """
 
+  def compute_entropy_p(probs):
+    probs_p = tf_print(probs, "Probs")                  # NaN: [256, 524]
+    result = safe_log(probs_p)                          # [256, 524] (Not NaN)
+    result_p = tf.Print(result, "Safe Log")
+    result_p = result_p * probs_p                       # NaN: [256, 524]
+    result_pp = tf.Print(result_p, "Safe Log * Probs")
+    return -tf.reduce_sum(result_pp, axis=-1)
+
+
   def compute_entropy(probs):
     return -tf.reduce_sum(safe_log(probs) * probs, axis=-1)
 
   _, arg_ids = actions
 
-  fn_pi, arg_pis = policy
+  fn_pi, arg_pis = policy  # XXX fn_pi [256, 524] is NaN
   fn_pi = mask_unavailable_actions(available_actions, fn_pi)  # [None, 524]
-  entropy = tf.reduce_mean(compute_entropy(fn_pi))  # XXX NaN spotted
+  entropy = tf.reduce_mean(compute_entropy(fn_pi))
   tf.summary.scalar('entropy/fn', entropy)
 
   for arg_type in arg_ids.keys():
