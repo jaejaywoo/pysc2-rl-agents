@@ -302,17 +302,17 @@ def compute_policy_entropy(available_actions, policy, actions):
 def sample_actions(available_actions, policy):
   """Sample function ids and arguments from a predicted policy."""
 
-  def sample(probs):
-    dist = Categorical(probs=probs)  # XXX Categorical/logits/Log:0: NaN
+  def sample(probs, name):
+    dist = Categorical(probs=probs, name=name)  # XXX Categorical/logits/Log:0: NaN
     return dist.sample()
 
   fn_pi, arg_pis = policy
   fn_pi = mask_unavailable_actions(available_actions, fn_pi)
-  fn_samples = sample(fn_pi)
+  fn_samples = sample(fn_pi, name="Categorical-fn")
 
   arg_samples = dict()
-  for arg_type, arg_pi in arg_pis.items():
-    arg_samples[arg_type] = sample(arg_pi)
+  for i, (arg_type, arg_pi) in enumerate(arg_pis.items()):
+    arg_samples[arg_type] = sample(arg_pi, name="Categorical-arg-%d"%i)
 
   return fn_samples, arg_samples
 
