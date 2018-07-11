@@ -136,14 +136,6 @@ class A2CAgent():
                                     decay=0.99,
                                     epsilon=1e-5)
 
-    '''
-    self.train_op = opt.minimize(
-        loss=loss,
-        global_step=global_step,
-        name='train_op')
-    
-    self.check_op = tf.add_check_numerics_ops()
-    '''
     self.train_op = layers.optimize_loss(
         loss=loss,
         global_step=global_step,
