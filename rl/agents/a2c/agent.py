@@ -141,7 +141,8 @@ class A2CAgent():
         loss=loss,
         global_step=global_step,
         name='train_op')
-
+    
+    self.check_op = tf.add_check_numerics_ops()
     '''
     self.train_op = layers.optimize_loss(
         loss=loss,
@@ -232,6 +233,7 @@ class A2CAgent():
         self.lstm_state_in[1]: lstm_state[1]
         })
       return self.sess.run(ops, feed_dict=feed_dict)
+
     actions, value = self.sess.run(ops, feed_dict=feed_dict)
     return actions, value, None
 
