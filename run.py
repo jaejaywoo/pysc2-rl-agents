@@ -207,9 +207,9 @@ def main():
 
         if args.train and isnan(loss):
           warning = 'NaN output detected from loss!' + \
-                    'Stopping the current run and start the next run at iter %d' % (agent_step)
-          #send_notification(slack=slack, message=warning, channel='#sc2')
-          #break
+                    'Stopping the SC2 environment...'
+          print(warning)
+          break
 
         i += 1
 
