@@ -4,6 +4,7 @@ import numpy as np
 import tensorflow as tf
 from tensorflow.contrib import layers
 from tensorflow.contrib.distributions import Categorical
+from tensorflow.python import debug as tf_debug
 
 from pysc2.lib.actions import TYPES as ACTION_TYPES
 
@@ -149,6 +150,9 @@ class A2CAgent():
         clip_gradients=self.max_gradient_norm,
         learning_rate=None,
         name="train_op")
+  
+    if self.debug:
+      self.check_op = tf.add_check_numerics_ops()
 
     if self.debug:
       self.check_op = tf.add_check_numerics_ops()
@@ -191,12 +195,21 @@ class A2CAgent():
           self.lstm_state_in[1]: lstm_state[1]
       })
     ops = [self.train_op, self.loss, self.train_summary_op]
-
+    
     if self.debug:
       ops.append(self.check_op)
-      *res, _ = self.sess.run(ops, feed_dict=feed_dict)
+      try:
+        *res, _ = self.sess.run(ops, feed_dict=feed_dict)
+      except tf.error.InvalidArgumentError as error:
+        print("Error: {} has occurred".format(error))
+        print("Error occurred at Node: {}".format(error.node_def))
+        print("Error occurred at Op: {}".format(error.op))
+        print("Error Message: {}".format(error.message))
+        print("Starting debug session...")
+        sess = tf_debug.LocalCLIDebugWrapperSession(sess)
     else:
       res = self.sess.run(ops, feed_dict=feed_dict)
+
     agent_step = self.train_step
     self.train_step += 1
     return (agent_step, res[1], res[-1])
@@ -303,7 +316,11 @@ def sample_actions(available_actions, policy):
   """Sample function ids and arguments from a predicted policy."""
 
   def sample(probs, name):
+<<<<<<< Updated upstream
     dist = Categorical(probs=probs, name=name)  # XXX Categorical/logits/Log:0: NaN
+=======
+    dist = Categorical(probs=probs, name=name)
+>>>>>>> Stashed changes
     return dist.sample()
 
   fn_pi, arg_pis = policy

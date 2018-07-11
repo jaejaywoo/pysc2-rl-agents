@@ -86,13 +86,13 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu
 
 # Random sample learning rate
-#if args.train and not args.load:
-#  args.lr = round(random.uniform(low=1e-5, high=1e-3), 5)
-#elif not args.train and not args.load:
-#  raise ValueError('Cannot evaluate an unsaved agent. Please retry with proper arguments.')
-#else:
-#  learning_rate = input("Please specify the learning rate.\n")
-#  args.lr = float(learning_rate)
+if args.train and not args.load:
+  args.lr = round(random.uniform(low=1e-5, high=1e-3), 5)
+elif not args.train and not args.load:
+  raise ValueError('Cannot evaluate an unsaved agent. Please retry with proper arguments.')
+else:
+  learning_rate = input("Please specify the learning rate.\n")
+  args.lr = float(learning_rate)
 
 # Specify model type
 if args.lstm:
@@ -149,9 +149,6 @@ def main():
     envs = SubprocVecEnv(env_fns)
 
     sess = tf.Session()
-    if args.debug:
-      sess = tf_debug.LocalCLIDebugWrapperSession(sess)
-      sess.add_tensor_filter('has_nan_or_inf', has_nan_or_inf)
 
     summary_writer = tf.summary.FileWriter(summary_path)
     network_data_format = 'NCHW' if args.nchw else 'NHWC'  # XXX NHWC -> NCHW
@@ -159,6 +156,7 @@ def main():
     # Create A2CAgent instance
     agent = A2CAgent(
         sess=sess,
+        debug=args.debug,
         network_data_format=network_data_format,
         value_loss_weight=args.value_loss_weight,
         entropy_weight=args.entropy_weight,
@@ -209,6 +207,10 @@ def main():
                     'Stopping the current run and start the next run at iter %d' % (agent_step)
           #send_notification(slack=slack, message=warning, channel='#sc2')
           #break
+          print(warning)
+          print("Starting debugging session...")
+          sess = tf_debug.LocalCLIDebugWrapperSession(sess)
+          sess.add_tensor_filter('has_nan_or_inf', has_nan_or_inf)
 
         i += 1
 
