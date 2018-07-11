@@ -154,9 +154,6 @@ class A2CAgent():
     if self.debug:
       self.check_op = tf.add_check_numerics_ops()
 
-    if self.debug:
-      self.check_op = tf.add_check_numerics_ops()
-
     self.samples = sample_actions(available_actions, policy)
 
   def get_obs_feed(self, obs):
