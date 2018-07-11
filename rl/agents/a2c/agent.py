@@ -197,7 +197,7 @@ class A2CAgent():
       ops.append(self.check_op)
       try:
         *res, _ = self.sess.run(ops, feed_dict=feed_dict)
-      except tf.error.InvalidArgumentError as error:
+      except tf.errors.InvalidArgumentError as error:
         print("Error: {} has occurred".format(error))
         print("Error occurred at Node: {}".format(error.node_def))
         print("Error occurred at Op: {}".format(error.op))
