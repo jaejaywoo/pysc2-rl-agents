@@ -316,11 +316,7 @@ def sample_actions(available_actions, policy):
   """Sample function ids and arguments from a predicted policy."""
 
   def sample(probs, name):
-<<<<<<< Updated upstream
     dist = Categorical(probs=probs, name=name)  # XXX Categorical/logits/Log:0: NaN
-=======
-    dist = Categorical(probs=probs, name=name)
->>>>>>> Stashed changes
     return dist.sample()
 
   fn_pi, arg_pis = policy
