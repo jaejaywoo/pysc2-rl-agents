@@ -154,9 +154,6 @@ class A2CAgent():
     if self.debug:
       self.check_op = tf.add_check_numerics_ops()
 
-    if self.debug:
-      self.check_op = tf.add_check_numerics_ops()
-
     self.samples = sample_actions(available_actions, policy)
 
   def get_obs_feed(self, obs):
@@ -205,8 +202,8 @@ class A2CAgent():
         print("Error occurred at Node: {}".format(error.node_def))
         print("Error occurred at Op: {}".format(error.op))
         print("Error Message: {}".format(error.message))
-        print("Starting debug session...")
-        sess = tf_debug.LocalCLIDebugWrapperSession(sess)
+        print("Terminating the env and saving the model...")
+        return None
     else:
       res = self.sess.run(ops, feed_dict=feed_dict)
 
@@ -316,11 +313,7 @@ def sample_actions(available_actions, policy):
   """Sample function ids and arguments from a predicted policy."""
 
   def sample(probs, name):
-<<<<<<< Updated upstream
     dist = Categorical(probs=probs, name=name)  # XXX Categorical/logits/Log:0: NaN
-=======
-    dist = Categorical(probs=probs, name=name)
->>>>>>> Stashed changes
     return dist.sample()
 
   fn_pi, arg_pis = policy

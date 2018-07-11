@@ -196,6 +196,10 @@ def main():
           _save_if_training(agent, summary_writer)
 
         result = runner.run_batch(train_summary=write_summary, lstm=args.lstm)
+        
+        # Debug return
+        if args.debug and result == None:
+          break
 
         if write_summary:
           agent_step, loss, summary = result
