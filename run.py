@@ -9,6 +9,7 @@ from slacker import Slacker
 from numpy import random
 
 import tensorflow as tf
+from tensorflow.python import debug as tfdbg
 
 from rl.agents.a2c.runner import A2CRunner
 from rl.agents.a2c.agent import A2CAgent
@@ -30,6 +31,8 @@ parser.add_argument('--eval', action='store_true',
 parser.add_argument('--load', action='store_true',
                     help='if true, loads the model from last ckpt and continue training')
 parser.add_argument('--debug', action='store_true',
+                    help='if true, check for undefined numerics')
+parser.add_argument('--tfdbg', action='store_true',
                     help='if true, deploy Tensorflow debugger wrapper')
 parser.add_argument('--ow', action='store_true',
                     help='overwrite existing experiments (if --train=True)')
@@ -147,7 +150,11 @@ def main():
     # Create envs
     envs = SubprocVecEnv(env_fns)
 
+    # Start tensorflow session
     sess = tf.Session()
+    if args.tfdbg:
+      sess = tfdbg.LocalCLIDebugWrapperSession(sess)
+    
     summary_writer = tf.summary.FileWriter(summary_path)
     network_data_format = 'NCHW' if args.nchw else 'NHWC'  # XXX NHWC -> NCHW
 
