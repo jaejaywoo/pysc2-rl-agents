@@ -207,10 +207,6 @@ def main():
                     'Stopping the current run and start the next run at iter %d' % (agent_step)
           #send_notification(slack=slack, message=warning, channel='#sc2')
           #break
-          print(warning)
-          print("Starting debugging session...")
-          sess = tf_debug.LocalCLIDebugWrapperSession(sess)
-          sess.add_tensor_filter('has_nan_or_inf', has_nan_or_inf)
 
         i += 1
 
