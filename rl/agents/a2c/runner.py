@@ -35,7 +35,7 @@ class A2CRunner():
     self.discount = discount
     self.preproc = Preprocessor(self.envs.observation_spec()[0])
     self.episode_counter = 0
-    self.mean_counter = 0
+    self.best_n_mean_counter = 0
     self.mean_score = 0.0
     self.cumulative_score = 0.0
 
@@ -43,6 +43,7 @@ class A2CRunner():
     obs_raw = self.envs.reset()
     self.last_obs = self.preproc.preprocess_obs(obs_raw)
     self.episode_last = [None for i in range(self.envs.n_envs)]
+    self.worker_scores = [0 for i in range(self.envs.n_envs)]
 
   def get_mean_score(self):
     return self.cumulative_score / self.episode_counter
@@ -52,8 +53,10 @@ class A2CRunner():
     id_str = " ".join(map(str, fn_ids))
     print("episode %d | Sampled action IDs: " % (self.episode_counter) + id_str)
 
-  def _summarize_episode(self, timestep):
+  def _summarize_episode(self, timestep, worker_id=None):
     score = timestep.observation["score_cumulative"][0]
+    self.worker_scores[worker_id] = score
+
     if self.summary_writer is not None:
       summary = tf.Summary()
       summary.value.add(tag='sc2/episode_score', simple_value=score)
@@ -63,16 +66,20 @@ class A2CRunner():
     self.episode_counter += 1
     return score
 
-  def _summarize_mean(self, score):
-    score /= self.envs.n_envs
+  def _summarize_best_and_mean(self):
+    mean_score = self.mean_score / self.envs.n_envs
+    best_score = max(self.worker_scores)
     if self.summary_writer is not None:
       summary = tf.Summary()
-      summary.value.add(tag='sc2/mean_score', simple_value=score)
-      self.summary_writer.add_summary(summary, self.mean_counter)
+      summary.value.add(tag='sc2/mean_score', simple_value=mean_score)
+      summary.value.add(tag='sc2/best_score', simple_value=best_score)
+      self.summary_writer.add_summary(summary, self.best_n_mean_counter)
 
-    print("step %d: mean score = %f" % (self.mean_counter, score))
+    print("step %d: MEAN SCORE = %f" % (self.best_n_mean_counter, mean_score))
+    print("step %d: BEST SCORE = %f" % (self.best_n_mean_counter, best_score))
     self.episode_last = [None for i in range(self.envs.n_envs)]
-    self.mean_counter += 1
+    self.mean_score = 0
+    self.best_n_mean_counter += 1
 
   def run_batch(self, train_summary=False, lstm=False):
     """Collect trajectories for a single batch and train (if self.train).
@@ -89,7 +96,7 @@ class A2CRunner():
     dones = np.zeros(shapes, dtype=np.float32)
     all_obs = []
     all_actions = []
-    all_scores = []
+    all_scores = []  # TODO: Unused local var?
 
     # TODO: Why do you save last_obs?
     last_obs = self.last_obs
@@ -112,15 +119,14 @@ class A2CRunner():
 
       for i, t in enumerate(obs_raw):
         if t.last():
-          score = self._summarize_episode(t)
+          score = self._summarize_episode(t, worker_id=i)
           self.cumulative_score += score
           self.mean_score += score
           self.episode_last[i] = t.last()
 
     # Get episode mean score of workers
     if all(self.episode_last):
-      self._summarize_mean(self.mean_score)
-      self.mean_score = 0
+      self._summarize_best_and_mean()
 
     self.last_obs = last_obs
     next_values = self.agent.get_value(last_obs, lstm_state)
