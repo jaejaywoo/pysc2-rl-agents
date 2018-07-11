@@ -14,7 +14,7 @@ from rl.agents.a2c.runner import A2CRunner
 from rl.agents.a2c.agent import A2CAgent
 from rl.networks.fully_conv import FullyConv
 from rl.environment import SubprocVecEnv, make_sc2env, SingleEnv
-from rl.util import has_nan_or_inf, send_notification
+from rl.util import send_notification
 
 # Workaround for pysc2 flags
 from absl import flags
@@ -197,6 +197,9 @@ def main():
         
         # Debug return
         if args.debug and result == None:
+          warning = 'Bad numerics detected by Tensorflow API!' + \
+                    'Stopping the environment...'
+          send_notification(slack, message=warning, channel='#sc2')
           break
 
         if write_summary:
@@ -208,6 +211,7 @@ def main():
           warning = 'NaN output detected from loss!' + \
                     'Stopping the SC2 environment...'
           print(warning)
+          send_notification(slack, message=warning, channel='#sc2')
           break
 
         i += 1
