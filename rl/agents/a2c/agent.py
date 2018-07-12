@@ -143,7 +143,7 @@ class A2CAgent():
         clip_gradients=self.max_gradient_norm,
         learning_rate=None,
         name="train_op")
-  
+
     if self.debug:
       self.check_op = tf.add_check_numerics_ops()
 
@@ -185,7 +185,7 @@ class A2CAgent():
           self.lstm_state_in[1]: lstm_state[1]
       })
     ops = [self.train_op, self.loss, self.train_summary_op]
-    
+
     if self.debug:
       ops.append(self.check_op)
       try:
@@ -307,7 +307,10 @@ def sample_actions(available_actions, policy):
   """Sample function ids and arguments from a predicted policy."""
 
   def sample(probs, name):
-    dist = Categorical(probs=probs, name=name)  # XXX Categorical/logits/Log:0: NaN
+    dist = Categorical(
+        probs=probs,
+        allow_nan_stats=False,
+        name=name)  # XXX Categorical/logits/Log:0: NaN
     return dist.sample()
 
   fn_pi, arg_pis = policy
