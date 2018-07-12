@@ -106,6 +106,11 @@ ckpt_path = os.path.join(args.save_dir, dir_name)
 summary_type = 'train' if args.train else 'eval'
 summary_base = os.path.join(args.summary_dir, dir_name, summary_type)
 
+# save model every 10 iterations when on debug mode
+if args.debug:
+  args.max_to_keep = 5
+  args.save_iters = 10 
+
 
 def _save_if_training(agent, summary_writer):
   if args.train:
