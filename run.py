@@ -15,7 +15,7 @@ from rl.agents.a2c.runner import A2CRunner
 from rl.agents.a2c.agent import A2CAgent
 from rl.networks.fully_conv import FullyConv
 from rl.environment import SubprocVecEnv, make_sc2env, SingleEnv
-from rl.util import send_notification
+from rl.util import set_global_seed, send_notification
 
 # Workaround for pysc2 flags
 from absl import flags
@@ -83,6 +83,9 @@ args = parser.parse_args()
 # TODO write args to config file and store together with summaries (https://pypi.python.org/pypi/ConfigArgParse)
 args.train = not args.eval
 
+# set random seed
+set_global_seed(args.seed)
+
 # Disable Tensorflow WARNING log
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu
@@ -109,7 +112,7 @@ summary_base = os.path.join(args.summary_dir, dir_name, summary_type)
 # save model every 10 iterations when on debug mode
 if args.debug:
   args.max_to_keep = 5
-  args.save_iters = 10 
+  args.save_iters = 1
 
 
 def _save_if_training(agent, summary_writer):
@@ -159,7 +162,7 @@ def main():
     sess = tf.Session()
     if args.tfdbg:
       sess = tfdbg.LocalCLIDebugWrapperSession(sess)
-    
+
     summary_writer = tf.summary.FileWriter(summary_path)
     network_data_format = 'NCHW' if args.nchw else 'NHWC'  # XXX NHWC -> NCHW
 
@@ -206,7 +209,7 @@ def main():
           _save_if_training(agent, summary_writer)
 
         result = runner.run_batch(train_summary=write_summary, lstm=args.lstm)
-        
+
         # Debug return
         if args.debug and result == None:
           warning = 'Bad numerics detected by Tensorflow API!' + \

@@ -2,6 +2,12 @@ import numpy as np
 import tensorflow as tf
 
 
+def set_global_seeds(i):
+    tf.set_random_seed(i)
+    np.random.seed(i)
+    random.seed(i)
+
+
 def tf_print(tensor, name):
   return tf.Print(tensor, [tensor],
       summarize=10000,
@@ -40,7 +46,7 @@ def safe_log(x):
   #    tf.reduce_any(tf.is_nan(result)),
   #    true_fn=lambda: tf.Print(result, [result], message="NaN detected at 'pysc2-rl-agents/rl/util.py/safe_log'\n"),
   #    false_fn=lambda: result)
-  #result = tf.Print(result, [result], summarize=16*524, message="safe_log tensors:\n") 
+  #result = tf.Print(result, [result], summarize=16*524, message="safe_log tensors:\n")
   return result
 
 
