@@ -15,7 +15,7 @@ from rl.agents.a2c.runner import A2CRunner
 from rl.agents.a2c.agent import A2CAgent
 from rl.networks.fully_conv import FullyConv
 from rl.environment import SubprocVecEnv, make_sc2env, SingleEnv
-from rl.util import set_global_seed, send_notification
+from rl.util import set_global_seeds, send_notification
 
 # Workaround for pysc2 flags
 from absl import flags
