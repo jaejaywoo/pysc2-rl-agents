@@ -84,7 +84,7 @@ args = parser.parse_args()
 args.train = not args.eval
 
 # set random seed
-set_global_seed(args.seed)
+set_global_seeds(args.seed)
 
 # Disable Tensorflow WARNING log
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
