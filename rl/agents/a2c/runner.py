@@ -30,6 +30,9 @@ class A2CRunner():
     self.envs = envs
     self.slack = slack
     self.summary_writer = summary_writer
+    if self.summary_writer is not None:
+      self.summary = tf.Summary()
+
     self.train = train
     self.n_steps = n_steps
     self.discount = discount
@@ -62,7 +65,7 @@ class A2CRunner():
       summary.value.add(tag='sc2/episode_score', simple_value=score)
       self.summary_writer.add_summary(summary, self.episode_counter)
 
-    print("episode %d: score = %f" % (self.episode_counter, score))
+    print("[Worker ID: %d] episode %d: score = %f" % (worker_id, self.episode_counter, score))
     self.episode_counter += 1
     return score
 

@@ -196,6 +196,8 @@ class A2CAgent():
         print("Error occurred at Op: {}".format(error.op))
         print("Error Message: {}".format(error.message))
         print("Terminating the env and saving the model...")
+
+        self.train_step += 1
         return None
     else:
       res = self.sess.run(ops, feed_dict=feed_dict)
