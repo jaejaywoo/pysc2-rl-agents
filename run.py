@@ -140,6 +140,7 @@ def main():
       shutil.rmtree(ckpt_path, ignore_errors=True)
       shutil.rmtree(summary_path, ignore_errors=True)
 
+    # Create envs
     size_px = (args.res, args.res)
     env_args = dict(
         map_name=args.map,
@@ -154,8 +155,6 @@ def main():
     num_no_vis = args.envs - num_vis
     if num_no_vis > 0:
       env_fns.extend([partial(make_sc2env, **env_args)] * num_no_vis)
-
-    # Create envs
     envs = SubprocVecEnv(env_fns)
 
     # Start tensorflow session
