@@ -196,7 +196,6 @@ class A2CAgent():
         print("Error occurred at Op: {}".format(error.op))
         print("Error Message: {}".format(error.message))
         print("Terminating the env and saving the model...")
-
         self.train_step += 1
         return None
     else:
@@ -258,8 +257,12 @@ class A2CAgent():
 
 def mask_unavailable_actions(available_actions, fn_pi):
   fn_pi *= available_actions
-  fn_pi /= tf.reduce_sum(fn_pi, axis=1, keepdims=True)
-  return fn_pi
+  #fn_pi /= tf.reduce_sum(fn_pi, axis=1, keepdims=True)
+  assert np.any(fn_pi), 'No available actions'
+  return tf.where(
+      tf.equal(fn_pi, 0),
+      tf.div(fn_pi, tf.reduce_sum(fn_pi, axis=1, keepdims=True)),
+      fn_pi)  # This second option should never pass
 
 
 def compute_policy_entropy(available_actions, policy, actions):
@@ -310,7 +313,7 @@ def sample_actions(available_actions, policy):
 
   def sample(probs, name):
     dist = Categorical(
-        probs=probs,
+        probs=probs + 1e-9,
         allow_nan_stats=False,
         name=name)  # XXX Categorical/logits/Log:0: NaN
     return dist.sample()

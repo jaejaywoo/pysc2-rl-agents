@@ -54,7 +54,7 @@ parser.add_argument('--steps_per_batch', type=int, default=16,
                     help='number of agent steps when collecting trajectories for a single batch')
 parser.add_argument('--discount', type=float, default=0.99,
                     help='discount for future rewards')
-parser.add_argument('--iters', type=int, default=1000000,
+parser.add_argument('--iters', type=int, default=int(1e6),
                     help='number of iterations to run (-1 to run forever)')
 parser.add_argument('--seed', type=int, default=123,
                     help='random seed')
