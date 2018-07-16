@@ -257,13 +257,10 @@ class A2CAgent():
 
 def mask_unavailable_actions(available_actions, fn_pi):
   fn_pi *= available_actions
-  #fn_pi /= tf.reduce_sum(fn_pi, axis=1, keepdims=True)
-  assert np.any(fn_pi), 'No available actions'
-  return tf.where(
-      tf.equal(fn_pi, 0),
-      tf.div(fn_pi, tf.reduce_sum(fn_pi, axis=1, keepdims=True)),
-      fn_pi)  # This second option should never pass
-
+  fn_pi /= tf.reduce_sum(fn_pi, axis=1, keepdims=True)
+  assert_numeric = tf.Assert(tf.is_numeric_tensor(fn_pi), [fn_pi], summarize=10000)
+  with tf.control_dependencies([assert_numeric]):
+    return fn_pi
 
 def compute_policy_entropy(available_actions, policy, actions):
   """Compute total policy entropy.
