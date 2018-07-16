@@ -64,7 +64,7 @@ parser.add_argument('--nchw', action='store_true',
                     help='train fullyConv in NCHW mode')
 parser.add_argument('--summary_iters', type=int, default=10,
                     help='record training summary after this many iterations')
-parser.add_argument('--save_iters', type=int, default=5000,
+parser.add_argument('--save_iters', type=int, default=200,
                     help='store checkpoint after this many iterations')
 parser.add_argument('--max_to_keep', type=int, default=2,
                     help='maximum number of checkpoints to keep before discarding older ones')
