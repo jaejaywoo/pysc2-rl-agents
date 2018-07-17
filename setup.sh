@@ -25,6 +25,9 @@ echo "export PROJECT_HOME=$HOME/Devel" >> .bashrc
 echo "export VIRTUALENVWRAPPER_PYTHON=/usr/bin/python3" >> .bashrc
 echo "source /usr/local/bin/virtualenvwrapper.sh" >> .bashrc
 echo "" >> .bashrc
+echo "# GPUSTATS" >> .bashrc
+echo "alias watch='watch --color -n1.0 gpustat --color'" >> .bashrc
+echo "" >> .bashrc
 
 # Add git config
 git config --global user.email "hjwoo@umich.edu"
