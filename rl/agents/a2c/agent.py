@@ -264,7 +264,7 @@ def mask_unavailable_actions(available_actions, fn_pi):
       from ipdb import set_trace; set_trace()
     return False
   debug_op = tf.py_func(_debug_func, [fn_pi, fn_pi_m, available_actions, denom, probs], [tf.bool])
-  with tf.control_dependencies([debug_op]):
+  with tf.control_dependencies(debug_op):
     probs = tf.identity(probs, name='probs')
     return probs
 
