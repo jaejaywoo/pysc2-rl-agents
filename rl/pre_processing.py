@@ -70,6 +70,7 @@ class Preprocessor():
     """
     available_actions = np.zeros(NUM_FUNCTIONS, dtype=np.float32)
     available_actions[obs['available_actions']] = 1
+    print("available_actions: \n{}".format(obs['available_actions']))
 
     # avoid on available actions by allowing no_op
     if not np.any(available_actions):

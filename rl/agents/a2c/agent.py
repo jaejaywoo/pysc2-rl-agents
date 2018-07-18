@@ -4,7 +4,6 @@ import numpy as np
 import tensorflow as tf
 from tensorflow.contrib import layers
 from tensorflow.contrib.distributions import Categorical
-from tensorflow.python import debug as tf_debug
 
 from pysc2.lib.actions import TYPES as ACTION_TYPES
 
