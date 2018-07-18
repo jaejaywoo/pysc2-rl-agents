@@ -263,7 +263,7 @@ def mask_unavailable_actions(available_actions, fn_pi):
     print("NaN detected in the tensor: 'fn_pi'")
     fn_pi_p = tf.Print(fn_pi, [fn_pi], message="Tensor fn_pi: \n")
     import sys; sys.exit(1)
-  return fn_pi
+  return fn_pi_check
 
 def compute_policy_entropy(available_actions, policy, actions):
   """Compute total policy entropy.
