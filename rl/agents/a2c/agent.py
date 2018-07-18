@@ -258,9 +258,13 @@ class A2CAgent():
 def mask_unavailable_actions(available_actions, fn_pi):
   fn_pi *= available_actions
   fn_pi /= tf.reduce_sum(fn_pi, axis=1, keepdims=True)
-  assert_numeric = tf.Assert(tf.is_numeric_tensor(fn_pi), [fn_pi], summarize=10000)
-  with tf.control_dependencies([assert_numeric]):
-    return fn_pi
+  try:
+    fn_pi_check = tf.check_numerics(fn_pi, message="Non-numeric detected in 'fn_pi' tensor")
+  except tf.errors.InvalidArgumentError as error:
+    print("NaN detected in the tensor: 'fn_pi'")
+    fn_pi_p = tf.Print(fn_pi, [fn_pi], message="Tensor fn_pi: \n")
+    import sys; sys.exit(1)
+  return fn_pi
 
 def compute_policy_entropy(available_actions, policy, actions):
   """Compute total policy entropy.
