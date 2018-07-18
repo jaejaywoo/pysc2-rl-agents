@@ -316,7 +316,7 @@ def sample_actions(available_actions, policy):
 
   def sample(probs, name):
     dist = Categorical(
-        probs=probs + 1e-9,
+        probs=probs,
         allow_nan_stats=False,
         name=name)  # XXX Categorical/logits/Log:0: NaN
     return dist.sample()
