@@ -256,14 +256,16 @@ class A2CAgent():
 
 def mask_unavailable_actions(available_actions, fn_pi):
   fn_pi *= available_actions
-  fn_pi /= tf.reduce_sum(fn_pi, axis=1, keepdims=True)
+  denom = tf.reduce_sum(fn_pi, axis=1, keepdims=True) + 1e-9  # Prevent possible NaN by adding epsilon
+  fn_pi_div = fn_pi / denom
   try:
-    fn_pi_check = tf.check_numerics(fn_pi, message="Non-numeric detected in 'fn_pi' tensor")
+    fn_pi_check = tf.check_numerics(fn_pi_div, message="Non-numeric detected in 'fn_pi' tensor")
   except tf.errors.InvalidArgumentError as error:
     print("NaN detected in the tensor: 'fn_pi'")
-    fn_pi_p = tf.Print(fn_pi, [fn_pi], message="Tensor fn_pi: \n")
-    import sys; sys.exit(1)
-  return fn_pi
+    print_op = tf.Print(fn_pi_div, [fn_pi_div], message="Tensor fn_pi: \n")
+    with tf.control_dependencied([print_op]):
+      import sys; sys.exit(1)
+  return fn_pi_check
 
 def compute_policy_entropy(available_actions, policy, actions):
   """Compute total policy entropy.
@@ -288,7 +290,7 @@ def compute_policy_entropy(available_actions, policy, actions):
 
   _, arg_ids = actions
 
-  fn_pi, arg_pis = policy  # XXX fn_pi [256, 524] is NaN
+  fn_pi, arg_pis = policy
   fn_pi = mask_unavailable_actions(available_actions, fn_pi)  # [None, 524]
   entropy = tf.reduce_mean(compute_entropy(fn_pi))
   tf.summary.scalar('entropy/fn', entropy)
