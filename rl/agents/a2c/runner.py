@@ -115,7 +115,17 @@ class A2CRunner():
       all_actions.append(actions)
 
       pysc2_actions = actions_to_pysc2(actions, size)
-      obs_raw = self.envs.step(pysc2_actions)
+      try:
+        obs_raw = self.envs.step(pysc2_actions)
+      except ValueError as error:
+        def _match_available_actions(last_obs, actions):
+          fn_ids, _ = actions
+          for n, obs in enumerate(last_obs):
+            if fn_ids[n] not in obs.observation['available_actions']:
+              print("[Worker ID-%d sampled unavailable action #%d"%(n, fn_ids[n]))
+          return False
+        from ipdb import set_trace; set_trace()
+
       last_obs = self.preproc.preprocess_obs(obs_raw)
       rewards[n, :] = [t.reward for t in obs_raw]
       dones[n, :] = [t.last() for t in obs_raw]
