@@ -116,7 +116,7 @@ class A2CRunner():
 
       pysc2_actions = actions_to_pysc2(actions, size)
       try:
-        obs_raw = self.envs.step(pysc2_actions)
+        obs_raw = self.envs.step(pysc2_actions, last_obs)
       except ValueError as error:
         def _match_available_actions(last_obs, actions):
           fn_ids, _ = actions
