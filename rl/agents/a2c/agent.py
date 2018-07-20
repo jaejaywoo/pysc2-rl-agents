@@ -255,8 +255,17 @@ class A2CAgent():
     print("Loaded agent at train_step %d" % self.train_step)
 
 def mask_unavailable_actions(available_actions, fn_pi):
+  '''WARNING: Masking the action probabilities can cause all action
+           probabilities to become zeros. This leads to the unwanted
+           division by zero, resulting in NaN values.
+
+           Adding an epsilon values to the denominator will prevent
+           division by zero, but since all the action probabilities
+           will still be zeros, it causes agent to sample unavailable
+           actions, which causes an error in the program.
+  '''
   fn_pi_m = fn_pi * available_actions
-  denom = tf.reduce_sum(fn_pi_m, axis=1, keepdims=True) + 1e-9  # Prevent possible NaN by adding epsilon
+  denom = tf.reduce_sum(fn_pi_m, axis=1, keepdims=True) + 1e-12  # Prevent possible NaN by adding epsilon
   probs  = fn_pi_m / denom
 
   def _debug_func(fn_pi, fn_pi_m, actions, denom, probs):
@@ -276,15 +285,6 @@ def compute_policy_entropy(available_actions, policy, actions):
   Returns:
     entropy: a scalar float tensor.
   """
-
-  def compute_entropy_p(probs):
-    probs_p = tf_print(probs, "Probs")                  # NaN: [256, 524]
-    result = safe_log(probs_p)                          # [256, 524] (Not NaN)
-    result_p = tf.Print(result, "Safe Log")
-    result_p = result_p * probs_p                       # NaN: [256, 524]
-    result_pp = tf.Print(result_p, "Safe Log * Probs")
-    return -tf.reduce_sum(result_pp, axis=-1)
-
 
   def compute_entropy(probs):
     return -tf.reduce_sum(safe_log(probs) * probs, axis=-1)
@@ -329,7 +329,7 @@ def sample_actions(available_actions, policy):
   for i, (arg_type, arg_pi) in enumerate(arg_pis.items()):
     arg_samples[arg_type] = sample(arg_pi, name="Categorical-arg-%d"%i)
 
-  return fn_samples, arg_samples
+  return (fn_samples, arg_samples, fn_pi)
 
 
 def compute_policy_log_probs(available_actions, policy, actions):

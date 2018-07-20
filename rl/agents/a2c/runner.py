@@ -101,12 +101,12 @@ class A2CRunner():
     all_actions = []
     all_scores = []  # TODO: Unused local var?
 
-    # TODO: Why do you save last_obs?
     last_obs = self.last_obs
     lstm_state = self.agent.lstm_state_init if lstm else None
 
     for n in range(self.n_steps):
       actions, value_estimate, lstm_state = self.agent.step(last_obs, lstm_state)
+      actions, masked_actions = mask_unavailable_samples(actions, last_obs)
       actions = mask_unused_argument_samples(actions)
       size = last_obs['screen'].shape[1:3]
 
@@ -114,18 +114,9 @@ class A2CRunner():
       all_obs.append(last_obs)
       all_actions.append(actions)
 
-      pysc2_actions = actions_to_pysc2(actions, size)
-      try:
-        obs_raw = self.envs.step(pysc2_actions, last_obs)
-      except ValueError as error:
-        def _match_available_actions(last_obs, actions):
-          fn_ids, _ = actions
-          for n, obs in enumerate(last_obs):
-            if fn_ids[n] not in obs.observation['available_actions']:
-              print("[Worker ID-%d sampled unavailable action #%d"%(n, fn_ids[n]))
-          return False
-        from ipdb import set_trace; set_trace()
-
+      #pysc2_actions = actions_to_pysc2(actions, size)
+      pysc2_actions = actions_to_pysc2(masked_actions, size)  # XXX Use masked samples
+      obs_raw = self.envs.step(pysc2_actions)
       last_obs = self.preproc.preprocess_obs(obs_raw)
       rewards[n, :] = [t.reward for t in obs_raw]
       dones[n, :] = [t.last() for t in obs_raw]
@@ -209,6 +200,16 @@ def actions_to_pysc2(actions, size):
     action = FunctionCall(a_0, a_l)
     actions_list.append(action)
   return actions_list
+
+
+def mask_unavailable_samples(actions, obs):
+  samples, arg_samples, probs = actions
+  available_actions = obs['available_actions']
+
+  mask = np.sum(probs, axis=1)
+  mask = [0 if ele == 0.0 else 1 for ele in mask]
+  masked_samples = samples * mask
+  return (samples, arg_samples), (masked_samples, arg_samples)
 
 
 def mask_unused_argument_samples(actions):
