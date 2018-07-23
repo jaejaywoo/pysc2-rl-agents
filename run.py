@@ -54,7 +54,7 @@ parser.add_argument('--steps_per_batch', type=int, default=16,
                     help='number of agent steps when collecting trajectories for a single batch')
 parser.add_argument('--discount', type=float, default=0.99,
                     help='discount for future rewards')
-parser.add_argument('--iters', type=int, default=int(1e6),
+parser.add_argument('--iters', type=int, default=int(5e5),
                     help='number of iterations to run (-1 to run forever)')
 parser.add_argument('--seed', type=int, default=123,
                     help='random seed')
@@ -223,6 +223,9 @@ def main():
         i += 1
 
         if 0 <= args.iters <= i:
+          log = 'Agent has finished training! Saving and closing the SC2 environment..'
+          print(log)
+          send_notification(slack, message=log, channel='#sc2')
           break
 
     except KeyboardInterrupt:
