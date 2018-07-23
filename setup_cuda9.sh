@@ -27,6 +27,4 @@ echo '' >> .bashrc
 echo "Reboot the shell by typing 'source ~/.bashrc'"
 
 # Clean up
-rm -rf cuda/
-rm -rf cuda-repo-ubuntu1604_9.0.176-1_amd64.deb
-rm -rf cudnn-9.0-linux-x64-v7.1.tgz
+rm -rf {cuda,cuda-repo-ubuntu1604_9.0.176-1_amd64.deb,cudnn-9.0-linux-x64-v7.1.tgz}
