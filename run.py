@@ -150,8 +150,11 @@ def main():
     envs = SubprocVecEnv(env_fns)
 
     # Start tensorflow session
-    gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.475)
-    sess = tf.Session(config=tf.ConfigProto(gpu_options=gpu_options))
+    if not args.lstm:
+      gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.475)
+      sess = tf.Session(config=tf.ConfigProto(gpu_options=gpu_options))
+    else:
+      sess = tf.Session()
     if args.tfdbg:
       sess = tfdbg.LocalCLIDebugWrapperSession(sess)
 
