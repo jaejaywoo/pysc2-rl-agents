@@ -227,7 +227,7 @@ def main():
 
         i += 1
 
-        if 0 <= args.num_timestep//nbatch <= i:
+        if 0 <= args.num_timesteps//nbatch <= i:
           log = 'Agent has finished training! Saving and closing the SC2 environment..'
           print(log)
           send_notification(slack, message=log, channel='#sc2')
