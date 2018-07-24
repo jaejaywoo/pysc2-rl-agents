@@ -54,9 +54,9 @@ parser.add_argument('--steps_per_batch', type=int, default=16,
                     help='number of agent steps when collecting trajectories for a single batch')
 parser.add_argument('--discount', type=float, default=0.99,
                     help='discount for future rewards')
-parser.add_argument('--iters', type=int, default=int(5e5),
-                    help='number of iterations to run (-1 to run forever)')
-parser.add_argument('--seed', type=int, default=123,
+parser.add_argument('--num_timesteps', type=int, default=int(30e6),
+                    help='total number of game steps to run')
+parser.add_argument('--seed', type=int, default=None,
                     help='random seed')
 parser.add_argument('--gpu', type=str, default='0',
                     help='gpu device id')
@@ -84,7 +84,8 @@ args = parser.parse_args()
 args.train = not args.eval
 
 # set random seed
-set_global_seeds(args.seed)
+if args.seed:
+  set_global_seeds(args.seed)
 
 # Disable Tensorflow WARNING log
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
@@ -192,6 +193,7 @@ def main():
 
     # Start Train/Eval
     i = 0
+    nbatch = args.envs * args.steps_per_batch
     try:
       while True:
         write_summary = args.train and i % args.summary_iters == 0
@@ -222,7 +224,7 @@ def main():
 
         i += 1
 
-        if 0 <= args.iters <= i:
+        if 0 <= args.num_timestep//nbatch <= i:
           log = 'Agent has finished training! Saving and closing the SC2 environment..'
           print(log)
           send_notification(slack, message=log, channel='#sc2')
