@@ -189,13 +189,15 @@ def main():
     # Load the latest ckpt
     if os.path.exists(ckpt_path):
       agent.load(ckpt_path)
+      load = True
     else:
       agent.init()
+      load = False
 
     runner.reset()
 
     # Start Train/Eval
-    i = 0
+    i = agent.train_step if load else 0
     nbatch = args.envs * args.steps_per_batch
     try:
       while True:
@@ -218,12 +220,12 @@ def main():
           summary_writer.add_summary(summary, global_step=agent_step)
           print('iter %d: loss = %f' % (agent_step, loss))
 
-        if args.train and isnan(loss):
-          warning = 'NaN output detected from loss!' + \
-                    'Stopping the SC2 environment...'
-          print(warning)
-          send_notification(slack, message=warning, channel='#sc2')
-          break
+        #if args.train and isnan(loss):
+        #  warning = 'NaN output detected from loss!' + \
+        #            'Stopping the SC2 environment...'
+        #  print(warning)
+        #  send_notification(slack, message=warning, channel='#sc2')
+        #  break
 
         i += 1
 
