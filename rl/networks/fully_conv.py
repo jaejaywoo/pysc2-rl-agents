@@ -5,6 +5,7 @@ from tensorflow.contrib import layers
 from pysc2.lib import actions
 from pysc2.lib import features
 
+from rl.util import batch_to_seq
 from rl.pre_processing import is_spatial_action, NUM_FUNCTIONS, FLAT_FEATURES
 
 
@@ -118,7 +119,7 @@ class FullyConv():
         return tf.transpose(map2d, [0, 3, 1, 2])
     return map2d
 
-  def build(self, screen_input, minimap_input, flat_input, lstm_state_in=None):
+  def build(self, screen_input, minimap_input, flat_input, lstm_state_in=None, is_train=None):
     """Build A2C policy model.
 
     Args:
@@ -145,34 +146,38 @@ class FullyConv():
 
     # convolutional LSTM
     if self.lstm:
-      lstm_in = tf.reshape(self.to_nhwc(state_out), [1, -1, 32, 32, 75])
+      lstm_in = batch_to_seq(self.to_nhwc(state_out), is_train)
+      #s1 = tf.shape(lstm_in)
+      #lstm_in_p = tf.Print(lstm_in, [s1], summarize=1000, message='LSTM input shape')
       lstm = tf.contrib.rnn.Conv2DLSTMCell(
-        input_shape=[32, 32, 1],
+        input_shape=[32, 32, 75],  # XXX verify
         kernel_shape=[3, 3],
         output_channels=75,
         name='conv_lstm')
-      c_init = np.zeros([1, 32, 32, 75], np.float32)
-      h_init = np.zeros([1, 32, 32, 75], np.float32)
-      self.state_init = [c_init, h_init]
 
-      # TODO: step_size of 16? What is the sequence here?
-      step_size = tf.shape(state_out)[:1]  # Get step_size from input dimension
+      #step_size = tf.shape(state_out)[:1]  # Get step_size from input dimension
       c_in, h_in = lstm_state_in
+      #s2 = tf.shape(c_in)
+      #s3 = tf.shape(h_in)
+      #c_in_p = tf.Print(c_in, [s2], summarize=1000, message='LSTM Cell state shape')
+      #h_in_p = tf.Print(h_in, [s3], summarize=1000, message='LSTM hidden state shape\n')
       state_in = tf.nn.rnn_cell.LSTMStateTuple(c_in, h_in)
-      self.step_size = tf.placeholder(tf.float32, [1])
-
+      #step_size = lstm_in.get_shape()[1].value
+      #step_size = tf.shape(lstm_in)[1]
       outputs, state = tf.nn.dynamic_rnn(
           cell=lstm,
           inputs=lstm_in,
-          sequence_length=step_size,  # XXX Maybe optional?
+          #sequence_length=step_size,  # XXX Maybe optional?
           initial_state=state_in,
           time_major=False,
           dtype=tf.float32,
           scope="lstm-dynamic")
 
+      #s4 = tf.shape(outputs)
+      #outputs_p = tf.Print(outputs, [s4], summarize=1000, message='LSTM stepsize / output shape')
       lstm_c, lstm_h = state
-      lstm_state_out = (lstm_c[:1, :], lstm_h[:1, :])
-      flat_out = tf.reshape(outputs, [-1, 76800], name="lstm-state/flatten")  # 32*32*75
+      lstm_new_state = (lstm_c, lstm_h)
+      flat_out = tf.reshape(outputs, [-1, 32*32*75], name="lstm-state/flatten")  # 32*32*75
       lstm_out = tf.reshape(outputs, [-1, 32, 32, 75], name="lstm-state-spatial")
     else:
       flat_out = layers.flatten(self.to_nhwc(state_out), scope="state/flatten")
@@ -204,5 +209,5 @@ class FullyConv():
     policy = (fn_out, args_out)
 
     if self.lstm:
-      return policy, value, lstm_state_out
+      return policy, value, lstm_new_state
     return policy, value

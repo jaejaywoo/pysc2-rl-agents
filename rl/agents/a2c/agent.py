@@ -65,17 +65,17 @@ class A2CAgent():
     flat = tf.placeholder(tf.float32, [None, ch['flat']],
                           'input_flat')
     if self.lstm:
-      # lstm initial state
-      c_init = np.zeros([1, res, res, 75], np.float32)
-      h_init = np.zeros([1, res, res, 75], np.float32)
-      self.lstm_state_init = (c_init, h_init)
+      is_train = tf.placeholder(tf.bool, [], 'is_train')
+      self.is_train = is_train
 
       # lstm state input
       c_in = tf.placeholder(tf.float32, [None, res, res, 75],
                             'conv_lstm/c_in')
       h_in = tf.placeholder(tf.float32, [None, res, res, 75],
                             'conv_lstm/h_in')
-      self.lstm_state_in = (c_in, h_in)
+      lstm_state_in = (c_in, h_in)
+      self.lstm_state_in = lstm_state_in
+
     available_actions = tf.placeholder(tf.float32, [None, ch['available_actions']],
                                        'input_available_actions')
     advs = tf.placeholder(tf.float32, [None], 'advs')
@@ -88,10 +88,10 @@ class A2CAgent():
     self.available_actions = available_actions
 
     if self.lstm:
-      policy, value, lstm_state_out = \
+      policy, value, lstm_new_states = \
           self.network_cls(data_format=self.network_data_format, lstm=self.lstm).build(
-              screen, minimap, flat, self.lstm_state_in)
-      self.lstm_state = lstm_state_out
+              screen, minimap, flat, lstm_state_in, is_train)
+      self.lstm_new_states = lstm_new_states
     else:
       policy, value = self.network_cls(data_format=self.network_data_format).build(
           screen, minimap, flat)
@@ -159,7 +159,7 @@ class A2CAgent():
     feed_dict.update({v: actions[1][k] for k, v in self.actions[1].items()})
     return feed_dict
 
-  def train(self, obs, actions, returns, advs, summary=False, lstm_state=None):
+  def train(self, obs, actions, returns, advs, summary=False, lstm_states=None):
     """
     Args:
       obs: dict of preprocessed observation arrays, with num_batch elements
@@ -180,8 +180,9 @@ class A2CAgent():
 
     if self.lstm:
       feed_dict.update({
-          self.lstm_state_in[0]: lstm_state[0],
-          self.lstm_state_in[1]: lstm_state[1]
+          self.is_train: True,
+          self.lstm_state_in[0]: lstm_states[0],
+          self.lstm_state_in[1]: lstm_states[1]
       })
     ops = [self.train_op, self.loss, self.train_summary_op]
 
@@ -204,7 +205,7 @@ class A2CAgent():
     self.train_step += 1
     return (agent_step, res[1], res[-1])
 
-  def step(self, obs, lstm_state=None):
+  def step(self, obs, lstm_states=None):
     """
     Args:
       obs: dict of preprocessed observation arrays, with num_batch elements
@@ -219,22 +220,24 @@ class A2CAgent():
     ops = [self.samples, self.value]
 
     if self.lstm:
-      ops.append(self.lstm_state)
+      ops.append(self.lstm_new_states)
       feed_dict.update({
-        self.lstm_state_in[0]: lstm_state[0],
-        self.lstm_state_in[1]: lstm_state[1]
-        })
+        self.is_train: False,
+        self.lstm_state_in[0]: lstm_states[0],
+        self.lstm_state_in[1]: lstm_states[1]
+      })
       return self.sess.run(ops, feed_dict=feed_dict)
 
     actions, value = self.sess.run(ops, feed_dict=feed_dict)
     return actions, value, None
 
-  def get_value(self, obs, lstm_state=None):
+  def get_value(self, obs, lstm_states=None):
     feed_dict = self.get_obs_feed(obs)
     if self.lstm:
       feed_dict.update({
-          self.lstm_state_in[0]: lstm_state[0],
-          self.lstm_state_in[1]: lstm_state[1]
+          self.is_train: False,
+          self.lstm_state_in[0]: lstm_states[0],
+          self.lstm_state_in[1]: lstm_states[1]
       })
     return self.sess.run(self.value, feed_dict=feed_dict)
 

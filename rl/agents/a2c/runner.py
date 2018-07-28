@@ -42,9 +42,13 @@ class A2CRunner():
     self.mean_score = 0.0
     self.cumulative_score = 0.0
 
-  def reset(self):
+  def reset(self, nenvs, res):
     obs_raw = self.envs.reset()
     self.last_obs = self.preproc.preprocess_obs(obs_raw)
+    lstm_state_shape = (nenvs, res, res, 75)
+    cell_state = np.zeros(shape=lstm_state_shape, dtype=np.float32)
+    hidden_state = np.zeros(shape=lstm_state_shape, dtype=np.float32)
+    self.lstm_states = (cell_state, hidden_state)
     self.episode_last = [None for i in range(self.envs.n_envs)]
     self.worker_scores = [0 for i in range(self.envs.n_envs)]
 
@@ -102,10 +106,10 @@ class A2CRunner():
     all_scores = []  # TODO: Unused local var?
 
     last_obs = self.last_obs
-    lstm_state = self.agent.lstm_state_init if lstm else None
+    lstm_states = self.lstm_states if lstm else None  # XXX reset?
 
     for n in range(self.n_steps):
-      actions, value_estimate, lstm_state = self.agent.step(last_obs, lstm_state)
+      actions, value_estimate, lstm_states = self.agent.step(last_obs, lstm_states)
       actions, masked_actions = mask_unavailable_samples(actions, last_obs)
       actions = mask_unused_argument_samples(actions)
       size = last_obs['screen'].shape[1:3]
@@ -133,7 +137,8 @@ class A2CRunner():
       self._summarize_best_and_mean()
 
     self.last_obs = last_obs
-    next_values = self.agent.get_value(last_obs, lstm_state)
+    self.lstm_states = lstm_states
+    next_values = self.agent.get_value(last_obs, lstm_states)
 
     returns, advs = compute_returns_advantages(
         rewards, dones, values, next_values, self.discount)
@@ -146,7 +151,7 @@ class A2CRunner():
     if self.train:
       return self.agent.train(
           obs, actions, returns, advs,
-          summary=train_summary, lstm_state=lstm_state
+          summary=train_summary, lstm_states=lstm_states
       )
 
     return None

@@ -14,6 +14,14 @@ def tf_print(tensor, name):
       summarize=10000,
       message='{} tensor:\n'.format(name))
 
+def batch_to_seq(tensor, is_train):
+  shape = tensor.get_shape()[1:].as_list()
+  return tf.cond(
+      pred=is_train,
+      true_fn=lambda: tf.reshape(tensor, [16, 16] + shape),
+      false_fn=lambda: tf.reshape(tensor, [16, 1] + shape),
+      name='batch_to_seq'
+  )
 
 def safe_div(numerator, denominator, name="value"):
   """Computes a safe divide which returns 0 if the denominator is zero.

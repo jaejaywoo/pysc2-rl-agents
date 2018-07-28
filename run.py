@@ -194,7 +194,7 @@ def main():
       agent.init()
       load = False
 
-    runner.reset()
+    runner.reset(nenvs=args.envs, res=args.res)
 
     # Start Train/Eval
     i = agent.train_step if load else 0
