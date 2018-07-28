@@ -322,8 +322,8 @@ def sample_actions(available_actions, policy):
     return dist.sample()
 
   fn_pi, arg_pis = policy
-  fn_pi = mask_unavailable_actions(available_actions, fn_pi)
-  fn_samples = sample(fn_pi, name="Categorical-fn")
+  fn_pi_m = mask_unavailable_actions(available_actions, fn_pi)
+  fn_samples = sample(fn_pi_m, name="Categorical-fn")
 
   arg_samples = dict()
   for i, (arg_type, arg_pi) in enumerate(arg_pis.items()):

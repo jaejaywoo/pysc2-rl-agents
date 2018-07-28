@@ -71,6 +71,12 @@ class Preprocessor():
     available_actions = np.zeros(NUM_FUNCTIONS, dtype=np.float32)
     available_actions[obs['available_actions']] = 1
 
+    def _sanity_check(mask, indices):
+      mask_indices = [i for i, x in enumerate(mask) if x != 0.0]
+      if set(mask_indices) != set(indices):
+        from IPython import embed; embed()
+    _sanity_check(available_actions, obs['available_actions'])
+
     screen = self._preprocess_spatial(obs['screen'])
     minimap = self._preprocess_spatial(obs['minimap'])
 
