@@ -148,7 +148,6 @@ class A2CRunner():
     returns = flatten_first_dims(returns)
     advs = flatten_first_dims(advs)
 
-    from IPython import embed; embed()
     if self.train:
       return self.agent.train(
           obs, actions, returns, advs,
