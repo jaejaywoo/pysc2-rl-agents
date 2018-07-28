@@ -184,7 +184,7 @@ class A2CAgent():
           self.lstm_state_in[0]: lstm_states[0],
           self.lstm_state_in[1]: lstm_states[1]
       })
-    ops = [self.train_op, self.loss, self.train_summary_op]
+    ops = [self.train_op, self.loss, self.train_summary_op, self.value]
 
     if self.debug:
       ops.append(self.check_op)
@@ -201,6 +201,7 @@ class A2CAgent():
     else:
       res = self.sess.run(ops, feed_dict=feed_dict)
 
+    from IPython import embed;embed()
     agent_step = self.train_step
     self.train_step += 1
     return (agent_step, res[1], res[-1])
