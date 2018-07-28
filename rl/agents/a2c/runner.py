@@ -143,6 +143,7 @@ class A2CRunner():
     returns = flatten_first_dims(returns)
     advs = flatten_first_dims(advs)
 
+    from IPython import embed; embed()
     if self.train:
       return self.agent.train(
           obs, actions, returns, advs,
@@ -204,8 +205,6 @@ def actions_to_pysc2(actions, size):
 
 def mask_unavailable_samples(actions, obs):
   samples, arg_samples, probs = actions
-  available_actions = obs['available_actions']
-
   mask = np.sum(probs, axis=1)
   mask = [0 if ele == 0.0 else 1 for ele in mask]
   masked_samples = samples * mask

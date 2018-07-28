@@ -183,7 +183,7 @@ class A2CAgent():
           self.lstm_state_in[0]: lstm_state[0],
           self.lstm_state_in[1]: lstm_state[1]
       })
-    ops = [self.train_op, self.loss, self.train_summary_op]
+    ops = [self.train_op, self.loss, self.train_summary_op, self.value]
 
     if self.debug:
       ops.append(self.check_op)
@@ -200,6 +200,7 @@ class A2CAgent():
     else:
       res = self.sess.run(ops, feed_dict=feed_dict)
 
+    from IPython import embed;embed()
     agent_step = self.train_step
     self.train_step += 1
     return (agent_step, res[1], res[-1])
@@ -322,8 +323,8 @@ def sample_actions(available_actions, policy):
     return dist.sample()
 
   fn_pi, arg_pis = policy
-  fn_pi_m = mask_unavailable_actions(available_actions, fn_pi)
-  fn_samples = sample(fn_pi_m, name="Categorical-fn")
+  fn_pi = mask_unavailable_actions(available_actions, fn_pi)
+  fn_samples = sample(fn_pi, name="Categorical-fn")
 
   arg_samples = dict()
   for i, (arg_type, arg_pi) in enumerate(arg_pis.items()):
