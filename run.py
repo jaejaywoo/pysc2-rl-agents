@@ -54,7 +54,7 @@ parser.add_argument('--steps_per_batch', type=int, default=16,
                     help='number of agent steps when collecting trajectories for a single batch')
 parser.add_argument('--discount', type=float, default=0.99,
                     help='discount for future rewards')
-parser.add_argument('--num_timesteps', type=int, default=int(30e6),
+parser.add_argument('--num_timesteps', type=int, default=int(50e6),
                     help='total number of game steps to run')
 parser.add_argument('--seed', type=int, default=None,
                     help='random seed')
@@ -198,7 +198,7 @@ def main():
 
     # Start Train/Eval
     i = agent.train_step if load else 0
-    nbatch = args.envs * args.steps_per_batch
+    total_frames = 0
     try:
       while True:
         write_summary = args.train and i % args.summary_iters == 0
@@ -206,7 +206,7 @@ def main():
         if i > 0 and i % args.save_iters == 0:
           _save_if_training(agent, summary_writer)
 
-        result = runner.run_batch(train_summary=write_summary, lstm=args.lstm)
+        result, total_frames = runner.run_batch(total_frames, train_summary=write_summary, lstm=args.lstm)
 
         # Debug return
         if args.debug and result == None:
@@ -229,7 +229,7 @@ def main():
 
         i += 1
 
-        if 0 <= args.num_timesteps//nbatch <= i:
+        if 0 <= args.num_timesteps <= total_frames:
           log = 'Agent has finished training! Saving and closing the SC2 environment..'
           print(log)
           send_notification(slack, message=log, channel='#sc2')

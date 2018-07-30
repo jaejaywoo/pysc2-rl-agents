@@ -60,7 +60,7 @@ class A2CRunner():
     id_str = " ".join(map(str, fn_ids))
     print("episode %d | Sampled action IDs: " % (self.episode_counter) + id_str)
 
-  def _summarize_episode(self, timestep, worker_id=None):
+  def _summarize_episode(self, timestep, total_frames, worker_id=None):
     score = timestep.observation["score_cumulative"][0]
     self.worker_scores[worker_id] = score
 
@@ -73,14 +73,21 @@ class A2CRunner():
     self.episode_counter += 1
     return score
 
-  def _summarize_best_and_mean(self):
+  def _summarize_best_and_mean(self, total_frames):
     mean_score = self.mean_score / self.envs.n_envs
     best_score = max(self.worker_scores)
+
     if self.summary_writer is not None:
       summary = tf.Summary()
       summary.value.add(tag='sc2/mean_score', simple_value=mean_score)
       summary.value.add(tag='sc2/best_score', simple_value=best_score)
       self.summary_writer.add_summary(summary, self.best_n_mean_counter)
+
+    if total_frames >= 0:
+      summary = tf.Summary()
+      summary.value.add(tag='sc2/mean_score_per_frames', simple_value=mean_score)
+      summary.value.add(tag='sc2/best_score_per_frames', simple_value=best_score)
+      self.summary_writer.add_summary(summary, total_frames)
 
     print("step %d: MEAN SCORE = %f" % (self.best_n_mean_counter, mean_score))
     print("step %d: BEST SCORE = %f" % (self.best_n_mean_counter, best_score))
@@ -88,7 +95,7 @@ class A2CRunner():
     self.mean_score = 0
     self.best_n_mean_counter += 1
 
-  def run_batch(self, train_summary=False, lstm=False):
+  def run_batch(self, total_frames, train_summary=False, lstm=False):
     """Collect trajectories for a single batch and train (if self.train).
 
     Args:
@@ -127,14 +134,15 @@ class A2CRunner():
 
       for i, t in enumerate(obs_raw):
         if t.last():
-          score = self._summarize_episode(t, worker_id=i)
+          score = self._summarize_episode(t, total_frames, worker_id=i)
           self.cumulative_score += score
           self.mean_score += score
           self.episode_last[i] = t.last()
+      total_frames += 1
 
     # Get episode mean score of workers
     if all(self.episode_last):
-      self._summarize_best_and_mean()
+      self._summarize_best_and_mean(total_frames)
 
     self.last_obs = last_obs
     self.lstm_states = lstm_states
@@ -150,11 +158,11 @@ class A2CRunner():
 
     if self.train:
       return self.agent.train(
-          obs, actions, returns, advs,
+          obs, actions, returns, advs, total_frames,
           summary=train_summary, lstm_states=lstm_states
       )
 
-    return None
+    return None, total_frames
 
 
 def compute_returns_advantages(rewards, dones, values, next_values, discount):

@@ -159,7 +159,7 @@ class A2CAgent():
     feed_dict.update({v: actions[1][k] for k, v in self.actions[1].items()})
     return feed_dict
 
-  def train(self, obs, actions, returns, advs, summary=False, lstm_states=None):
+  def train(self, obs, actions, returns, advs, total_frames, summary=False, lstm_states=None):
     """
     Args:
       obs: dict of preprocessed observation arrays, with num_batch elements
@@ -203,7 +203,7 @@ class A2CAgent():
 
     agent_step = self.train_step
     self.train_step += 1
-    return (agent_step, res[1], res[-1])
+    return (agent_step, res[1], res[-1]), total_frames
 
   def step(self, obs, lstm_states=None):
     """
