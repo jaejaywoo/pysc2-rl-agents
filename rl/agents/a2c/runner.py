@@ -125,24 +125,24 @@ class A2CRunner():
       all_obs.append(last_obs)
       all_actions.append(actions)
 
-      #pysc2_actions = actions_to_pysc2(actions, size)
       pysc2_actions = actions_to_pysc2(masked_actions, size)  # XXX Use masked samples
       obs_raw = self.envs.step(pysc2_actions)
       last_obs = self.preproc.preprocess_obs(obs_raw)
       rewards[n, :] = [t.reward for t in obs_raw]
       dones[n, :] = [t.last() for t in obs_raw]
 
+      # episode summary
       for i, t in enumerate(obs_raw):
         if t.last():
           score = self._summarize_episode(t, total_frames, worker_id=i)
           self.cumulative_score += score
           self.mean_score += score
           self.episode_last[i] = t.last()
-      total_frames += 1
 
-    # Get episode mean score of workers
-    if all(self.episode_last):
-      self._summarize_best_and_mean(total_frames)
+      # mean and best scores summary
+      if all(self.episode_last):
+        self._summarize_best_and_mean(total_frames)
+      total_frames += 1
 
     self.last_obs = last_obs
     self.lstm_states = lstm_states
