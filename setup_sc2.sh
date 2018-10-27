@@ -4,8 +4,8 @@
 cd $HOME
 sudo apt-get install unzip
 mkdir -p .local/{lib,bin} && cd .local/lib
-wget http://blzdistsc2-a.akamaihd.net/Linux/SC2.3.16.1.zip
-unzip SC2.3.16.1.zip && rm -rf SC2.3.16.1.zip
+wget http://blzdistsc2-a.akamaihd.net/Linux/SC2.4.1.2.60604_2018_05_16.zip
+unzip SC2.4.1.2.60604_2018_05_16.zip && rm -rf SC2.4.1.2.60604_2018_05_16.zip
 
 cd StarCraftII/Maps
 wget http://blzdistsc2-a.akamaihd.net/MapPacks/Melee.zip
