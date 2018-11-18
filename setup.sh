@@ -27,14 +27,13 @@ echo "source /usr/local/bin/virtualenvwrapper.sh" >> .bashrc
 echo "" >> .bashrc
 echo "# GPUSTATS" >> .bashrc
 echo "alias watch='watch --color -n1.0 gpustat --color'" >> .bashrc
-echo "alias tb='tensorboard --logdir=$PWD'" >> .bashrc
 echo "" >> .bashrc
 
 # Clean up
 rm -rf {get_pip.py}
 
 # Add git config
-git config --global user.email "hjwoo@umich.edu"
-git config --global user.name "Hyunjae Woo"
+#git config --global user.email "hjwoo@umich.edu"
+#git config --global user.name "Hyunjae Woo"
 
 echo "Reboot your shell by typing 'source ~/.bashrc'"
